@@ -137,7 +137,7 @@ This installation guide is for OpenStack "**Liberty**" on **Ubuntu 14.04**
 12) Verify that the Nova service and endpoints were added to the Service Catalog
     $ openstack catalog list
 
-![](https://github.com/cloudandbigdatalab/OpenStack-Projects/tree/master/nova/resources/CLI/openstack_catalog_list.png)
+![openstack_catalog_list](./resources/CLI/openstack_catalog_list.png)
 
 13) Configure Nova
 
@@ -227,12 +227,12 @@ This installation guide is for OpenStack "**Liberty**" on **Ubuntu 14.04**
 16) Verify that Nova is running
     $ pgrep -l nova
 
-![](https://github.com/cloudandbigdatalab/OpenStack-Projects/tree/master/nova/resources/CLI/pgrep_-l_nova.png)
+![pgrep_-l_nova](./resources/CLI/pgrep_-l_nova.png)
 
 17) Verify that the Nova services are enabled and operational
     $ nova service-list
 
-![](https://github.com/cloudandbigdatalab/OpenStack-Projects/tree/master/nova/resources/CLI/nova_service-list.png)
+![nova_service-list](./resources/CLI/nova_service-list.png)
 
 ## 4. CLI ##
 
@@ -242,19 +242,19 @@ This installation guide is for OpenStack "**Liberty**" on **Ubuntu 14.04**
     
     $ nova list
 
-![](https://github.com/cloudandbigdatalab/OpenStack-Projects/tree/master/nova/resources/CLI/nova_list.png)
+![nova_list](./resources/CLI/nova_list.png)
 
 **List all available images**  (e.g. Different Operating Systems)
 
     $ nova image-list
 
-![](https://github.com/cloudandbigdatalab/OpenStack-Projects/tree/master/nova/resources/CLI/nova_image-list.png)
+![nova_image-list](./resources/CLI/nova_image-list.png)
 
 **List all available flavors**  (e.g. Different virtual machine configurations)
 
     $ nova flavor-list
 
-![](https://github.com/cloudandbigdatalab/OpenStack-Projects/tree/master/nova/resources/CLI/nova_flavor-list.png)
+![nova_flavor-list](./resources/CLI/nova_flavor-list.png)
 
 ### 4.2 Managing Instances ###
 
