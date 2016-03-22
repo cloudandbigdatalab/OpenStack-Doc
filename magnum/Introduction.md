@@ -24,6 +24,59 @@ Magnum can be installed in DevStack by enabling the plugin in your `local.conf`.
 *Details on full deployment coming soon.*
 
 ## CLI
+Magnum is used through the `magnum` Python client. Here's a partial overview of the available magnum-specific commands.
+
+```
+baymodel-create     Create a baymodel.
+baymodel-delete     Delete specified baymodel.
+baymodel-list       Print a list of bay models.
+baymodel-show       Show details about the given baymodel.
+baymodel-update     Updates one or more baymodel attributes.
+bay-create          Create a bay.
+bay-delete          Delete specified bay.
+bay-list            Print a list of available bays.
+bay-show            Show details about the given bay.
+bay-update          Update information about the given bay.
+ca-show             Show details about the CA certificate for a bay.
+ca-sign             Generate the CA certificate for a bay.
+container-create    Create a container.
+container-delete    Delete specified containers.
+container-exec      Execute command in a container.
+container-list      Print a list of available containers.
+container-logs      Get logs of a container.
+container-pause     Pause specified containers.
+container-reboot    Reboot specified containers.
+container-show      Show details of a container.
+container-start     Start specified containers.
+container-stop      Stop specified containers.
+container-unpause   Unpause specified containers.
+service-list        Print a list of magnum services.
+pod-create          Create a pod.
+pod-delete          Delete specified pod.
+pod-list            Print a list of registered pods.
+pod-show            Show details about the given pod.
+pod-update          Update information about the given pod.
+rc-create           Create a replication controller.
+rc-delete           Delete specified replication controller.
+rc-list             Print a list of registered replication controllers.
+rc-show             Show details about the given replication controller.
+rc-update           Update information about the given replication
+                    controller.
+coe-service-create  Create a coe service.
+coe-service-delete  Delete specified coe service.
+coe-service-list    Print a list of coe services.
+coe-service-show    Show details about the given coe service.
+coe-service-update  Update information about the given coe service.
+bash-completion     Prints arguments for bash-completion. Prints all of
+                    the commands and options to stdout so that the
+                    magnum.bash_completion script doesn't have to hard
+                    code them.
+help                Display help about this program or one of its
+                    subcommands.
+```
+
+The Magnum Quick Start guide has instructions on [building a Kubernetes Bay](http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#using-kubernetes-bay) and [building a Swarm Bay](http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#building-and-using-a-swarm-bay).
+
 
 ## Code Review
 *Not sure what's needed for this section.*  
@@ -123,3 +176,10 @@ magnum/
 |-- specs
 `-- tools
 ```
+
+## References
+<https://wiki.openstack.org/wiki/Magnum>  
+<http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#exercising-the-services-using-devstack>  
+<http://docs.openstack.org/developer/devstack/guides/single-vm.html>  
+<http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#using-kubernetes-bay>  
+<http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#building-and-using-a-swarm-bay>
