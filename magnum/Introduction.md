@@ -12,15 +12,16 @@ In magnum you create *bays*. A bay is where your container orchestrations softwa
 ## Architecture
 ![Magnum Architecture Diagram](./photos/magnum_architecture.png)
 
-Magnum uses the standard OpenStack projects and Heat for orchestration.
+Magnum uses the standard OpenStack projects and Heat for orchestration. Nodes of Magnum bays are normal Nova or Ironic instances.
 
 > Magnum uses Heat to orchestrate an OS image which contains Docker and Kubernetes [or Swarm or Mesos] and runs that image in either virtual machines or bare metal in a cluster configuration.
 
 ![Screenshot of Heat Stack in Horizon](./photos/magnum_heat.png)
 
-Nodes of Magnum bays are normal Nova or Ironic instances.
-
 ## Installation
+Magnum can be installed in DevStack by enabling the plugin in your `local.conf`. `enable_plugin magnum https://git.openstack.org/openstack/magnum` The full details can be found [here](http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#exercising-the-services-using-devstack) The [Cloud Init](./cloud.init) file in this directory can be used to initialize a cloud machine with DevStack and Magnum.
+
+*Details on full deployment coming soon.*
 
 ## CLI
 
