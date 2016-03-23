@@ -149,24 +149,95 @@ By default, ceilometer is not enabled in the devstack environment, so we need to
     ```
 
 ##5. Using CLI##
-* Displaying Meters
+
+```
+    alarm-combination-create    Create a new alarm based on state of other
+                                alarms.
+    alarm-combination-update    Update an existing alarm based on state of
+                                other alarms.
+    alarm-create                Create a new alarm (Deprecated). Use alarm-
+                                threshold-create instead.
+    alarm-delete                Delete an alarm.
+    alarm-event-create          Create a new alarm based on events.
+    alarm-event-update          Update an existing alarm based on events.
+    alarm-gnocchi-aggregation-by-metrics-threshold-create
+                                Create a new alarm based on computed
+                                statistics.
+    alarm-gnocchi-aggregation-by-metrics-threshold-update
+                                Update an existing alarm based on computed
+                                statistics.
+    alarm-gnocchi-aggregation-by-resources-threshold-create
+                                Create a new alarm based on computed
+                                statistics.
+    alarm-gnocchi-aggregation-by-resources-threshold-update
+                                Update an existing alarm based on computed
+                                statistics.
+    alarm-gnocchi-resources-threshold-create
+                                Create a new alarm based on computed
+                                statistics.
+    alarm-gnocchi-resources-threshold-update
+                                Update an existing alarm based on computed
+                                statistics.
+    alarm-history               Display the change history of an alarm.
+    alarm-list                  List the user's alarms.
+    alarm-show                  Show an alarm.
+    alarm-state-get             Get the state of an alarm.
+    alarm-state-set             Set the state of an alarm.
+    alarm-threshold-create      Create a new alarm based on computed
+                                statistics.
+    alarm-threshold-update      Update an existing alarm based on computed
+                                statistics.
+    alarm-update                Update an existing alarm (Deprecated).
+    capabilities                Print Ceilometer capabilities.
+    event-list                  List events.
+    event-show                  Show a particular event.
+    event-type-list             List event types.
+    meter-list                  List the user's meters.
+    query-alarm-history         Query Alarm History.
+    query-alarms                Query Alarms.
+    query-samples               Query samples.
+    resource-list               List the resources.
+    resource-show               Show the resource.
+    sample-create               Create a sample.
+    sample-create-list          Create a sample list.
+    sample-list                 List the samples (return OldSample objects if
+                                -m/--meter is set).
+    sample-show                 Show a sample.
+    statistics                  List the statistics for a meter.
+    trait-description-list      List trait info for an event type.
+    trait-list                  List all traits with name <trait_name> for
+                                Event Type <event_type>.
+    bash-completion             Prints all of the commands and options to
+                                stdout.
+    help                        Display help about this program or one of its
+                                subcommands.
+```
+
+**Example of meter-list:**
 
     ```
-    ceilometer meter-list
+   $ ceilometer meter-list
+   +----------------------------+------------+-----------+---------------+-----------+--------------+
+   | Name                       | Type       | Unit      | Resource ID   | User ID   | Project ID   |
+   +----------------------------+------------+-----------+---------------+-----------+--------------+
+   | cpu                        | cumulative | ns        | INSTANCE_ID_1 | USER_ID_A | PROJECT_ID_X |
+   | cpu                        | cumulative | ns        | INSTANCE_ID_2 | USER_ID_B | PROJECT_ID_Y |
+   | cpu                        | cumulative | ns        | INSTANCE_ID_3 | USER_ID_C | PROJECT_ID_Z |
+   | cpu_util                   | gauge      | %         | INSTANCE_ID_1 | USER_ID_A | PROJECT_ID_X |
+   | cpu_util                   | gauge      | %         | INSTANCE_ID_3 | USER_ID_C | PROJECT_ID_Z |
+   | disk.ephemeral.size        | gauge      | GB        | INSTANCE_ID_1 | USER_ID_A | PROJECT_ID_X |
+   | disk.ephemeral.size        | gauge      | GB        | INSTANCE_ID_2 | USER_ID_B | PROJECT_ID_Y |
+   | disk.ephemeral.size        | gauge      | GB        | INSTANCE_ID_3 | USER_ID_C | PROJECT_ID_Z |
+   | ... [snip]                                                                                     |
+   +----------------------------+------------+-----------+---------------+-----------+--------------+
     ```
-
-* we can use -q option in the above command to constrain the query, for example by resource id and timestamp 
-
-     ```
-     ceilometer sample-list --meter cpu -q 'resource_id=INSTANCE_ID_1;timestamp>2013-10-01T09:00:00;timestamp<=2013-10-01T09:30:00'
-     ```
 
 * Using Aggregate Statistics:
 * Individual data points for a particular meter may be aggregated into consolidated statistics via the CLI statistics command:
 
-     ```
+    ```
     ceilometer statistics --meter cpu_util
-     ```
+    ```
 
 
 
