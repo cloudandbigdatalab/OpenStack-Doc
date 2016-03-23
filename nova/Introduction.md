@@ -1029,3 +1029,15 @@ Reconstructs the image using a new image while maintaining its other properties
 [Keystone Interaction](http://essentials.cloudtrain.me/)
 
 [Keystone Token](http://docs.openstack.org/liberty/config-reference/content/keystone-configuration-file.html)
+
+[Notifications In Nova](http://docs.openstack.org/developer/nova/notifications.html)
+
+[Nova Conductor](http://docs.openstack.org/developer/nova/conductor.html)
+
+[Nova Host Aggregates](http://docs.openstack.org/developer/nova/aggregates.html)
+
+[Nova Internalization](http://docs.openstack.org/developer/nova/i18n.html)
+
+[Nova VM States and Transistions](http://docs.openstack.org/developer/nova/vmstates.html)
+
+[Nova REST API](http://developer.openstack.org/api-ref-compute-v2.1.html)
