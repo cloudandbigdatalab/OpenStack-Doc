@@ -5,6 +5,10 @@
 - 2) Architecture
 	- 2.1) Interactions with other OpenStack Services
 		- 2.1.1) Glance
+		- 2.1.2) Neutron
+	- 2.2) Messaging
+	- 2.3) Filter Schedule
+	- 2.4) Threading Model
 - 3) Installation
 	- 3.1) Installing Nova from DevStack Source
 	- 3.2) Installing Nova from Packages 
@@ -29,7 +33,13 @@ As the most distributed component in the OpenStack platform, Nova interacts heav
 
 ## 2. Architecture ##
 
-### 2.1 AMQP and Nova ###
+### 2.1.2 Nova Interaction with Neutron ###
+
+Neutron plays a huge role in ensuring that nova instances are able to communicate with each other from the users point of view. Many different instances can exist across multiple compute nodes, which will exist on different hardware, however they all need to behave as though they are on the same local network. When an instance is booted, it needs to communicate with Neutron's API to get its own IP address based on the virtual network that it is supposed to be a part of. 
+
+Nova can access the Neutron API and get information about which Networks, subnets, and ports a specific tenant has access to, which all need to be checked before a specific instance gets permission to use them.
+
+### 2.2 Messaging ###
 
 Advanced Message Queueing Protocol (AMQP) is a messaging protocol used by OpenStack allowing Nova components to communicate with each other. AMQP uses a broker, either RabbitMQ or Qpid, to allow these Nova components to send Remote Procedure Calls (RPC) using a publish/subscribe paradigm. 
 
@@ -71,7 +81,7 @@ A Topic Publisher sends the message request into the queueing system, which is t
 ![RPC Cast Pic]
 (http://docs.openstack.org/developer/nova/_images/flow2.png)
 
-### 2.2 Filter Scheduler ###
+### 2.3 Filter Scheduler ###
 
 The Filter Scheduler uses filtering and weighting to make informed decisions on where a new instance should be created on a Compute Node.
 
@@ -85,7 +95,7 @@ The weighing process is defined by equations which can also be set by the user. 
 ![Weighing]
 (http://docs.openstack.org/developer/nova/_images/filteringWorkflow2.png)
 
-### 2.3 Threading Model ###
+### 2.4 Threading Model ###
 
 All OpenStack services use green thread model of threading, implemented through using the Python eventlet and greenlet libraries. Green threads emulate real threading without relying on any native OS capabilities, they are managed completely in user space instead of kernel space, which allows them to work in environments that do not have native thread support. They use a cooperative model of threading, meaning context switches only occur when specific eventlet or greenlet library calls are made. It is important to keep in mind that there is only one operating system thread per service, so any call that blocks the main thread will block the entire process.
 
