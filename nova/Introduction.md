@@ -5,6 +5,11 @@
 - 2) Architecture
 	- 2.1) Interactions with other OpenStack Services
 		- 2.1.1) Glance
+		- 2.1.2) Neutron
+	- 2.2) Messaging
+	- 2.3) Filter Schedule
+	- 2.4) Threading Model
+	- 2.5) Block Device Mapping
 - 3) Installation
 	- 3.1) Installing Nova from DevStack Source
 	- 3.2) Installing Nova from Packages 
@@ -29,9 +34,102 @@ As the most distributed component in the OpenStack platform, Nova interacts heav
 
 ## 2. Architecture ##
 
-**Messaging**
+### 2.1.2 Nova Interaction with Neutron ###
 
-**Scheduler**
+Neutron plays a huge role in ensuring that nova instances are able to communicate with each other from the users point of view. Many different instances can exist across multiple compute nodes, which will exist on different hardware, however they all need to behave as though they are on the same local network. When an instance is booted, it needs to communicate with Neutron's API to get its own IP address based on the virtual network that it is supposed to be a part of. 
+
+Nova can access the Neutron API and get information about which Networks, subnets, and ports a specific tenant has access to, which all need to be checked before a specific instance gets permission to use them.
+
+### 2.2 Messaging ###
+
+Advanced Message Queueing Protocol (AMQP) is a messaging protocol used by OpenStack allowing Nova components to communicate with each other. AMQP uses a broker, either RabbitMQ or Qpid, to allow these Nova components to send Remote Procedure Calls (RPC) using a publish/subscribe paradigm. 
+
+The architecture can be explained by the following picture: 
+
+![AMQP Architecture Image]
+(http://docs.openstack.org/developer/nova/_images/arch.png)
+
+Nova provides an adapter class which will marshal and unmarshal the messages from the RPC calls into function calls. 
+
+#### Nova RPC Mappings####
+Each Nova component will connect to a message broker node and will use the queue as either a Worker(Compute or Network) or an Invoker (API or Scheduler). Keep in mind that Workers and Invokers are just conceptual to aid in understanding, and do not actually exist as Nova objects. Invokers send messages in the queue system via rpc.call and rpc.cast, Workers receive messages from the queue system and reply to rpc.call operations.
+
+The following figure shows the message broker node and how it interacts with the different pieces. They are described below.
+
+![RPC broker node pic]
+(http://docs.openstack.org/developer/nova/_images/rabt.png)
+
+- Topic Publisher: object is instantiated and pushes a message to the queueing system after an rpc.call or an rpc.cast
+- Direct Consumer: object is instantiated to receive a response message from the queueing system after an rpc.call
+- Topic Consumer: object receives message from the queue and invokes the action defined by the Worker role. Each Worker has two Topic Consumers, one for rpc.cast and one for rpc.call operations.
+- Direct Publisher: instantiated to return the message required by the request/response operation after an rpc.call.
+- Topic Exchange: routing table that exists in the context of a virtual host, each message broker node has one topic exchange for every topic in Nova
+- Direct Exchange: routing table created during rpc.call operations, an instance is created for each rpc.call invocation
+- Queue Element: Messages are kept in the queue until a Topic or Direct Consumer connects to fetch it. Queues can be shared amongst Workers of the same type (Compute node, Network node, etc)
+
+#### RPC Calls and Casts####
+The diagram below shows the message flow during an rpc.call operation:
+
+A Topic Publisher is instantiated and sends the message request to the queueing system and a Direct Consumer is instantiated to waiat for the response. The exchange will dispatch the message based on the routing key and the Topic Consumer will fetch it, then pass it to a Worker for that task. When this task is complete a Direct publisher is allocated to send the response message to the queueing system. This message is dispatched by the exchange and fetched by a Direct Consumer based on the routing key, then passed to the Invoker.
+
+![RPC Call pic]
+(http://docs.openstack.org/developer/nova/_images/flow1.png)
+
+The diagram below shows the message flow during an rpc.cast operation:
+
+A Topic Publisher sends the message request into the queueing system, which is then dispatched by the exchange. It is fetched by the Topic Consumer based on the routing key and passed to the Worker for that task.
+
+![RPC Cast Pic]
+(http://docs.openstack.org/developer/nova/_images/flow2.png)
+
+### 2.3 Filter Scheduler ###
+
+The Filter Scheduler uses filtering and weighting to make informed decisions on where a new instance should be created on a Compute Node.
+
+![Threading Model]
+(http://docs.openstack.org/developer/nova/_images/filteringWorkflow1.png)
+
+The Filter Scheduler looks over all compute nodes and evaluates them against a set of filters. The filters will eliminate some of the hosts, and the resulting hosts will be weighted, which will sort them by suitability. The Scheduler will then choose the hosts for each instance based on the weights. It is possible that the Scheduler may not find any candidate for the next instance, in which case that instance will not be booted. If the default scheduling algorithm is insufficient for a users needs, that user can create their own scheduling algorithm. There are a lot of built in functions that can be used to define the filtering algorithm.
+
+The weighing process is defined by equations which can also be set by the user. Different properties, such as RAM usage, CPU usage, Disk usage, I/O usage, etc, can be assigned different values in order to use a custom sorting to choose which host is the most suitable for the new instance(s).
+
+![Weighing]
+(http://docs.openstack.org/developer/nova/_images/filteringWorkflow2.png)
+
+### 2.4 Threading Model ###
+
+All OpenStack services use green thread model of threading, implemented through using the Python eventlet and greenlet libraries. Green threads emulate real threading without relying on any native OS capabilities, they are managed completely in user space instead of kernel space, which allows them to work in environments that do not have native thread support. They use a cooperative model of threading, meaning context switches only occur when specific eventlet or greenlet library calls are made. It is important to keep in mind that there is only one operating system thread per service, so any call that blocks the main thread will block the entire process.
+
+### 2.5 Block Device Mapping ###
+
+In nova, each instance can have a variety of block devices available to it, depending on the deployment. Limitations can be set for certain users or tenants for each instance. Block device mapping is a way to organize and keep data about all the block devices an instance has.
+
+Block device mapping usually refers to one of two things. First, the API or CLI structure and syntax required to specify which block devices for an instance boot. Second, the internal data structure inside nova that is used for recording and keeping in a block device mapping table.
+
+There have been a variety of implementations for this that have all had their issues, however the most recent and currently used is Block Device Mapping v2.
+
+This new block device mapping is a list of dictionaries containing the following fields (in addition to the ones that were already there):
+
+- source_type - this can have one of the following values:
+  - image
+  - volume
+  - snapshot
+  - blank
+- dest_type - this can have one of the following values:
+  - local
+  - volume
+
+Combination of the above two fields would define what kind of block device the entry is referring to. The following combinations are supported. Nova will do validation to ensure the requested mapping is valid before accepting a boot request.
+
+- image -> local: this is only currently reserved for the entry referring to the Glance image that the instance is being booted with 
+- volume -> volume: Cinder volume to be attached to the instance, can be marked as a boot device.
+- snapshot -> volume: creates a volume from a Cinder volume snapshot and attach that volume to the instance, can be marked bootable.
+- image -> volume: Download a Glance image to a cinder volume and attach it to an instance, can also be marked as bootable
+- blank -> volume: Creates a blank Cinder volume and attaches it
+- blank -> local - Depending on the guest_format field, this will either mean an ephemeral blank disk on hypervisor local storage, or a swap disk
+
+
+
 
 **Notifications**
 
