@@ -5,9 +5,9 @@ Shawn Aten, Annie Lezil, Mohan Muppidi
 ## Introduction
 > Magnum is an OpenStack API service developed by the OpenStack Containers Team making container orchestration engines such as Docker and Kubernetes available as first class resources in OpenStack. Magnum uses Heat to orchestrate an OS image which contains Docker and Kubernetes and runs that image in either virtual machines or bare metal in a cluster configuration.
 
-Magnum automates the setup of Kubernetes, Swarm, or Mesos clusters on OpenStack deployments making setup faster and more consistent. The use of containers in the cloud allows for denser utilization of VM and hardware resources.
+The usage of containers is rapidly increasing across different fields. Docker is a popular tool that abstracts some aspects of Linux containers. Kubernetes and Swarm are popular tools to orchestrate nodes to run Docker containers. Containers on OpenStack enable denser and more flexible use of resources. Magnum brings containers up as first-class citizens on OpenStack by automating the orchestration of Kubernetes and Swarm clusters.
 
-In magnum you create *bays*. A bay is where your container orchestration software (Kubernetes, Swarm, Mesos) runs. Bays can contain multiple nodes. A bay is accessible to a single tenant. Bays with different engines can be run side by side so you're not locked-in to a single platform.
+To accomplish this Magnum uses the standard OpenStack projects (Nova, Neutron, Glance, Cinder) and the Heat orchestration project. Essentially Magnum works at the Heat level to automate the specific use case of creating Kubernetes or Swarm clusters.
 
 ## Architecture
 ![Magnum Architecture Diagram](./photos/magnum_architecture.png)
@@ -15,6 +15,8 @@ In magnum you create *bays*. A bay is where your container orchestration softwar
 Magnum uses the standard OpenStack projects and Heat for orchestration. Nodes of Magnum bays are normal Nova or Ironic instances.
 
 > Magnum uses Heat to orchestrate an OS image which contains Docker and Kubernetes [or Swarm or Mesos] and runs that image in either virtual machines or bare metal in a cluster configuration.
+
+In magnum you create *bays*. A bay is where your container orchestration software (Kubernetes, Swarm, Mesos) runs. Bays can contain multiple nodes. A bay is accessible to a single tenant. Bays with different engines can be run side by side so you're not locked-in to a single platform.
 
 ![Screenshot of Heat Stack in Horizon](./photos/magnum_heat.png)
 
