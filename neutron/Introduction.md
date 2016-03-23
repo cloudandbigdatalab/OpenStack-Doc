@@ -13,7 +13,7 @@ Neutron is Openstack's Networking service provider. Main goals of Neutron are: -
   <li>
     *aas as a service. Ex: Load Balancer as a service , Firewall as a service.
   </li>
-  </ul>
+</ul>
 
 
 # Architecture
@@ -28,7 +28,9 @@ Neutron is Openstack's Networking service provider. Main goals of Neutron are: -
 
 ![Alt Text](https://github.com/cloudandbigdatalab/OpenStack-Projects/blob/master/neutron/netronCoreConcepts.JPG?raw=true) <br/>
 
+Next we will discuss about various types of networks in neutron: <br/>
 
+![alt tag](https://raw.githubusercontent.com/cloudandbigdatalab/OpenStack-Projects/master/neutron/providerNTenant.JPG) <br/>
 
 # Installation
 
