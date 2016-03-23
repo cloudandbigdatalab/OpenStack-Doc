@@ -60,9 +60,6 @@ Magnum can be installed in DevStack by enabling the plugin in your `local.conf`.
 ## CLI
 Magnum is used through the *magnum* Python client. To interact with bays (create pods, run containers, etc.) you use the magnum client, not the kubectl or docker-swarm clients. Here's a partial overview of the available commands.
 
-- add example of creating Kubernetes bay
-- add example of using Kubernetes bay
-
 ```
 baymodel-create     Create a baymodel.
 baymodel-delete     Delete specified baymodel.
@@ -112,12 +109,11 @@ help                Display help about this program or one of its
                     subcommands.
 ```
 
-The Magnum Quick Start guide has instructions on [building a Kubernetes Bay](http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#using-kubernetes-bay) and [building a Swarm Bay](http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#building-and-using-a-swarm-bay).
+### Creating a Kubernetes Bay
 
+### Using Kubernetes Bay
 
 ## Code Review
-*Not sure what's needed for this section.*  
-Code Review is done through Gerrit.
 
 ## Code Contribution
 ```
@@ -220,6 +216,7 @@ magnum/
 <http://docs.openstack.org/developer/devstack/guides/single-vm.html>  
 <http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#using-kubernetes-bay>  
 <http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#building-and-using-a-swarm-bay>
+<http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#using-kubernetes-bay>
 
 [1]: https://wiki.openstack.org/wiki/Magnum
 [2]: https://en.wikipedia.org/wiki/Operating-system-level_virtualization
