@@ -136,18 +136,29 @@ By default, ceilometer is not enabled in the devstack environment, so we need to
 
 7. Cinder does not generate notifications by default. To enable these auditing events, set the following in the cinder configuration file and restart the service:
 
-```
-notification_driver=messagingv2
-```
+    ```
+    notification_driver=messagingv2
+    ```
 
-##5. Using CLI## 
+##5. Using CLI##
 * Displaying Meters
 
-```
-ceilometer meter-list
-```
+    ```
+    ceilometer meter-list
+    ```
 
+* we can use -q option in the above command to constrain the query, for example by resource id #and timestamp 
 
+    '''
+    ceilometer sample-list --meter cpu -q 'resource_id=INSTANCE_ID_1;timestamp>2013-10-01T09:00:00;timestamp<=2013-10-01T09:30:00'
+    '''
+
+* Using Aggregate Statistics:
+* Individual data points for a particular meter may be aggregated into consolidated statistics via #the CLI statistics command:
+
+    '''
+    ceilometer statistics --meter cpu_util
+    '''
 
 
 
