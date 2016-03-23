@@ -25,7 +25,7 @@ Nova is used for hosting and managing cloud computing systems.  It is a componen
 
 Nova is built on a messaging architecture.  All of its components can typically be run on several servers.  This architecture allows the components to communicate through a message queue. Deferred objects are used to avoid blocking while a component waits in the message queue for a response.
 
-As the most distributed (and complex) component in the OpenStack platform, Nova interacts heavily with other OpenStack services like Keystone for performing authentication, Horizon for its Web interface and Glance for supplying its images.
+As the most distributed component in the OpenStack platform, Nova interacts heavily with other OpenStack services like Keystone for performing authentication, Horizon for its Web interface and Glance for supplying its images.
 
 ## 2. Architecture ##
 
@@ -53,6 +53,10 @@ The Nova DB stores the current state of all objects in the compute cluster.  It 
 #### 2.1.1  Glance ####
 
 Nova's most important interactions are with the Glance service.  Glance is responsible for the management and retrieval of virtual machine images.  While Glance itself does not store the images, it is a necessary layer of abstraction which provides all of the necessary data in order for Nova to start the virtual machine.  Glance allows users to create and list available images, which are fed into Nova to be executed.  When a user creates a snapshot of their virtual machine, they have actually created a new image.  Glance will add the new image to its database and storage back end.
+
+#### 2.1.2  Keystone ####
+
+Nova interacts with Keystone to perform authentication.  For instance, if a user wanted to create a new instance, Nova would need to send a request to Keystone with the user's password and username.  Keystone would then reply to Nova with a Token assuming the credentials were valid.  Nova will then use this token when it performs tasks by sending it to Keystone for validation.  In our example, if the token is valid, Nova can continue with making the  user's instance.  Tokens are valid for one hour by default.
 
 ## 3. Installation ##
 
@@ -444,3 +448,5 @@ Reconstructs the image using a new image while maintaining its other properties
 [Fault tolerance](https://en.wikipedia.org/wiki/Fault_tolerance)
 
 [Nova DB](http://www.slideshare.net/mirantis/openstack-architecture-43160012)
+
+[Keystone Interaction](http://essentials.cloudtrain.me/)
