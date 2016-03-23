@@ -4,7 +4,7 @@
 - 1) Introduction
 - 2) Architecture
 	- 2.1) Interactions with other OpenStack Services
-		- 2.1) Glance
+		- 2.1.1) Glance
 - 3) Installation
 	- 3.1) Installing Nova from DevStack Source
 	- 3.2) Installing Nova from Packages 
@@ -12,13 +12,20 @@
   - 4.1) Managing Nova
   - 4.2) Managing Instances
   - 4.3) Accessing Instances
-- 5) Code Review
-- 6) Code Contribution
-- 7) References
+- 5) Definitions
+- 6) Code Review
+- 7) Code Contribution
+- 8) References
 
 ## 1. Introduction ##
 
-What is Nova?
+Nova is all about access to compute resources.  
+
+Nova is used for hosting and managing cloud computing systems.  It is a component based architecture enabling quicker additions of new features.  It is scalable, on-demand, fault tolerant, recoverable and provides API-compatibility with systems like Amazon EC2.  Nova provides compute resources such as virtual machines, containers, and bare metal servers.
+
+Nova is built on a messaging architecture.  All of its components can typically be run on several servers.  This architecture allows the components to communicate through a message queue. Deferred objects are used to avoid blocking while a component waits in the message queue for a response.
+
+As the most distributed (and complex) component in the OpenStack platform, Nova interacts heavily with other OpenStack services like Keystone for performing authentication, Horizon for its Web interface and Glance for supplying its images.
 
 ## 2. Architecture ##
 
@@ -27,6 +34,12 @@ What is Nova?
 **Scheduler**
 
 **Compute**
+
+Compute manages communication with hypervisors and virtual machines.  You can create compute nodes that will receive requests from the controller node and virtual machine instances.  The compute service relies on a hypervisor to run virtual machine instances.  OpenStack can use a number of various hypervisors such as Docker, KVM or QEMU.
+
+The basics:  Compute will accept actions from the queue and then perform a series of system commands and carry them out while updating status in the database.
+
+While all services are designed to be horizontally scalable, you should have significantly more computes then anything else.
 
 **Conductor**
 
@@ -390,11 +403,25 @@ Reconstructs the image using a new image while maintaining its other properties
     
     Example:  ip netns exec qdhcp-0ffaa6c5-4fe3-4758-9b67-5bbe558f7c15 ssh -i test.pem cirros@10.0.0.4
 
-## 5. Code Review ##
+## 5. Definitions ##
 
-## 6. Code Contribution ##
+**Bare metal Server** - A bare metal environment is a computer system or network in which a virtual machine is installed directly on hardware rather than within the host operating system (OS). The term "bare metal" refers to a hard disk, the usual medium on which a computer's OS is installed.
 
-## 7. References ##
+**Container** - Container-based virtualization, also called operating system virtualization, is an approach to virtualization in which the virtualization layer runs as an application within the operating system (OS). In this approach, the operating system's kernel runs on the hardware node with several isolated guest virtual machines (VMs) installed on top of it. The isolated guests are called containers. 
+
+**Fault tolerance** - Fault tolerance is the property that enables a system to continue operating properly in the event of the failure of (or one or more faults within) some of its components.
+
+## 6. Code Review ##
+
+## 7. Code Contribution ##
+
+## 8. References ##
+
+[Introduction - Webopedia](http://www.webopedia.com/TERM/O/openstack-nova.html)
+
+[Introduction - OpenStack](http://docs.openstack.org/developer/nova/project_scope.html)
+
+[Introduction - Jenkov](http://tutorials.jenkov.com/jquery/deferred-objects.html)
 
 [http://docs.openstack.org/developer/devstack/](http://docs.openstack.org/developer/devstack/)
 
@@ -404,3 +431,12 @@ Reconstructs the image using a new image while maintaining its other properties
 
 [http://www.ibm.com/developerworks/cloud/library/cl-openstack-nova-glance/](http://www.ibm.com/developerworks/cloud/library/cl-openstack-nova-glance/)
 
+[Compute Node](http://blog.flux7.com/blogs/openstack/tutorial-what-is-nova-and-how-to-install-use-it-openstack)
+
+[Compute Node](http://ken.pepple.info/openstack/2011/04/22/openstack-nova-architecture/)
+
+[Bare metal server](http://searchservervirtualization.techtarget.com/definition/bare-metal-environment)
+
+[Container](http://searchservervirtualization.techtarget.com/definition/container-based-virtualization-operating-system-level-virtualization)
+
+[Fault tolerance](https://en.wikipedia.org/wiki/Fault_tolerance)
