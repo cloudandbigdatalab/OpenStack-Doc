@@ -1,13 +1,13 @@
-# UTSA OCI - Intel Internship
 # OpenStack Magnum Project
-# Shawn Aten, Annie Lezil, Mohan Muppidi
+UTSA OCI - Intel Internship  
+Shawn Aten, Annie Lezil, Mohan Muppidi
 
 ## Introduction
 > Magnum is an OpenStack API service developed by the OpenStack Containers Team making container orchestration engines such as Docker and Kubernetes available as first class resources in OpenStack. Magnum uses Heat to orchestrate an OS image which contains Docker and Kubernetes and runs that image in either virtual machines or bare metal in a cluster configuration.
 
 Magnum automates the setup of Kubernetes, Swarm, or Mesos clusters on OpenStack deployments making setup faster and more consistent. The use of containers in the cloud allows for denser utilization of VM and hardware resources.
 
-In magnum you create *bays*. A bay is where your container orchestrations software (Kubernetes, Swarm, Mesos) runs. Bays can contain multiple nodes. A bay is accessible to a single tenant. Bays with different engines can be run side by side so you're not locked-in to a single platform. You utilize bays through the each engine's standard client (kubectl, docker-swarm, etc.).
+In magnum you create *bays*. A bay is where your container orchestrations software (Kubernetes, Swarm, Mesos) runs. Bays can contain multiple nodes. A bay is accessible to a single tenant. Bays with different engines can be run side by side so you're not locked-in to a single platform.
 
 ## Architecture
 ![Magnum Architecture Diagram](./photos/magnum_architecture.png)
@@ -24,7 +24,7 @@ Magnum can be installed in DevStack by enabling the plugin in your `local.conf`.
 *Details on full deployment coming soon.*
 
 ## CLI
-Magnum is used through the `magnum` Python client. Here's a partial overview of the available magnum-specific commands.
+Magnum is used through the *magnum* Python client. To interact with bays (create pods, run containers, etc.) you use the magnum client, not the kubectl or docker-swarm clients. Here's a partial overview of the available commands.
 
 ```
 baymodel-create     Create a baymodel.
