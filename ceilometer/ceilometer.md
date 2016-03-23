@@ -126,11 +126,11 @@ By default, ceilometer is not enabled in the devstack environment, so we need to
 
 5. This example local.conf file shows all of the settings required for ceilometer:
 
-```
-[[local|localrc]]
-Enable the Ceilometer devstack plugin
-enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer.git
-```
+    ```
+    [[local|localrc]]
+    Enable the Ceilometer devstack plugin
+    enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer.git
+    ```
 
 6. Nova does not generate the periodic notifications for all known instances by default. To enable these auditing events, set instance_usage_audit to true in the nova configuration file and restart the service.
 
