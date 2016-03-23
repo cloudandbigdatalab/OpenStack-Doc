@@ -29,9 +29,61 @@ As the most distributed component in the OpenStack platform, Nova interacts heav
 
 ## 2. Architecture ##
 
-**Messaging**
+### 2.1 AMQP and Nova ###
 
-**Scheduler**
+Advanced Message Queueing Protocol (AMQP) is a messaging protocol used by OpenStack allowing Nova components to communicate with each other. AMQP uses a broker, either RabbitMQ or Qpid, to allow these Nova components to send Remote Procedure Calls (RPC) using a publish/subscribe paradigm. 
+
+The architecture can be explained by the following picture: 
+
+![AMQP Architecture Image]
+(http://docs.openstack.org/developer/nova/_images/arch.png)
+
+Nova provides an adapter class which will marshal and unmarshal the messages from the RPC calls into function calls. 
+
+#### Nova RPC Mappings####
+Each Nova component will connect to a message broker node and will use the queue as either a Worker(Compute or Network) or an Invoker (API or Scheduler). Keep in mind that Workers and Invokers are just conceptual to aid in understanding, and do not actually exist as Nova objects. Invokers send messages in the queue system via rpc.call and rpc.cast, Workers receive messages from the queue system and reply to rpc.call operations.
+
+The following figure shows the message broker node and how it interacts with the different pieces. They are described below.
+
+![RPC broker node pic]
+(http://docs.openstack.org/developer/nova/_images/rabt.png)
+
+- Topic Publisher: object is instantiated and pushes a message to the queueing system after an rpc.call or an rpc.cast
+- Direct Consumer: object is instantiated to receive a response message from the queueing system after an rpc.call
+- Topic Consumer: object receives message from the queue and invokes the action defined by the Worker role. Each Worker has two Topic Consumers, one for rpc.cast and one for rpc.call operations.
+- Direct Publisher: instantiated to return the message required by the request/response operation after an rpc.call.
+- Topic Exchange: routing table that exists in the context of a virtual host, each message broker node has one topic exchange for every topic in Nova
+- Direct Exchange: routing table created during rpc.call operations, an instance is created for each rpc.call invocation
+- Queue Element: Messages are kept in the queue until a Topic or Direct Consumer connects to fetch it. Queues can be shared amongst Workers of the same type (Compute node, Network node, etc)
+
+#### RPC Calls and Casts####
+The diagram below shows the message flow during an rpc.call operation:
+
+A Topic Publisher is instantiated and sends the message request to the queueing system and a Direct Consumer is instantiated to waiat for the response. The exchange will dispatch the message based on the routing key and the Topic Consumer will fetch it, then pass it to a Worker for that task. When this task is complete a Direct publisher is allocated to send the response message to the queueing system. This message is dispatched by the exchange and fetched by a Direct Consumer based on the routing key, then passed to the Invoker.
+
+![RPC Call pic]
+(http://docs.openstack.org/developer/nova/_images/flow1.png)
+
+The diagram below shows the message flow during an rpc.cast operation:
+
+A Topic Publisher sends the message request into the queueing system, which is then dispatched by the exchange. It is fetched by the Topic Consumer based on the routing key and passed to the Worker for that task.
+
+![RPC Cast Pic]
+(http://docs.openstack.org/developer/nova/_images/flow2.png)
+
+### 2.2 Filter Scheduler ###
+
+The Filter Scheduler uses filtering and weighting to make informed decisions on where a new instance should be created on a Compute Node.
+
+![Threading Model]
+(http://docs.openstack.org/developer/nova/_images/filteringWorkflow1.png)
+
+The Filter Scheduler looks over all compute nodes and evaluates them against a set of filters. The filters will eliminate some of the hosts, and the resulting hosts will be weighted, which will sort them by suitability. The Scheduler will then choose the hosts for each instance based on the weights. It is possible that the Scheduler may not find any candidate for the next instance, in which case that instance will not be booted. If the default scheduling algorithm is insufficient for a users needs, that user can create their own scheduling algorithm. There are a lot of built in functions that can be used to define the filtering algorithm.
+
+The weighing process is defined by equations which can also be set by the user. Different properties, such as RAM usage, CPU usage, Disk usage, I/O usage, etc, can be assigned different values in order to use a custom sorting to choose which host is the most suitable for the new instance(s).
+
+![Weighing]
+(http://docs.openstack.org/developer/nova/_images/filteringWorkflow2.png)
 
 **Notifications**
 
