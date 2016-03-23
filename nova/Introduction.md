@@ -405,9 +405,18 @@ Reconstructs the image using a new image while maintaining its other properties
 
 ## 7. References ##
 
+[Introduction - Webopedia](http://www.webopedia.com/TERM/O/openstack-nova.html)
+
+[Introduction - OpenStack](http://docs.openstack.org/developer/nova/project_scope.html)
+
+[Introduction - Jenkov](http://tutorials.jenkov.com/jquery/deferred-objects.html)
+
 [http://docs.openstack.org/developer/devstack/](http://docs.openstack.org/developer/devstack/)
 
 [http://docs.openstack.org/user-guide/cli_cheat_sheet.html](http://docs.openstack.org/user-guide/cli_cheat_sheet.html)
 
 [http://docs.openstack.org/liberty/install-guide-ubuntu/](http://docs.openstack.org/liberty/install-guide-ubuntu/)
 
+[Compute Node](http://blog.flux7.com/blogs/openstack/tutorial-what-is-nova-and-how-to-install-use-it-openstack)
+
+[Compute Node](http://ken.pepple.info/openstack/2011/04/22/openstack-nova-architecture/)
