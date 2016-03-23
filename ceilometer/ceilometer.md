@@ -147,18 +147,18 @@ By default, ceilometer is not enabled in the devstack environment, so we need to
     ceilometer meter-list
     ```
 
-* we can use -q option in the above command to constrain the query, for example by resource id #and timestamp 
+* we can use -q option in the above command to constrain the query, for example by resource id and timestamp 
 
-    '''
-    ceilometer sample-list --meter cpu -q 'resource_id=INSTANCE_ID_1;timestamp>2013-10-01T09:00:00;timestamp<=2013-10-01T09:30:00'
-    '''
+     ```
+     ceilometer sample-list --meter cpu -q 'resource_id=INSTANCE_ID_1;timestamp>2013-10-01T09:00:00;timestamp<=2013-10-01T09:30:00'
+     ```
 
 * Using Aggregate Statistics:
-* Individual data points for a particular meter may be aggregated into consolidated statistics via #the CLI statistics command:
+* Individual data points for a particular meter may be aggregated into consolidated statistics via the CLI statistics command:
 
-    '''
+     ```
     ceilometer statistics --meter cpu_util
-    '''
+     ```
 
 
 
