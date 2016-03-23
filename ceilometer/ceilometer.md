@@ -136,18 +136,22 @@ enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer.git
 
 7. Cinder does not generate notifications by default. To enable these auditing events, set the following in the cinder configuration file and restart the service:
 
-```notification_driver=messagingv2```
+```
+notification_driver=messagingv2
+```
 
-
-5. Using CLI 
+##5. Using CLI## 
 * Displaying Meters
-```   ceilometer meter-list ```
+
+```
+ceilometer meter-list
+```
 
 
 
 
 
-6. References:
+##6. References:##
 
 [1] most of the content is taken after reading  http://docs.openstack.org/developer/ceilometer/
 [2] http://docs.openstack.org/developer/ceilometer/_images/ceilo-gnocchi-arch.png
