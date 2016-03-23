@@ -41,18 +41,20 @@ Container: A Docker container
 ![Magnum Architecture Diagram](./photos/magnum_architecture.png)
 
 ### 2.1. Components of Magnum
+The Magnum project is composed of three main components: magnum-api, magnum-conductor, and python-magnumclient.
 
-The Magnum project is composed of three main components, the Magnum API and Magnum Conductor, and the CLI client.
+The python-magnumclient is similar to the other OpenStack Python clients. It sends requests to the magnum-api REST server. (The magnum-api REST server may run as one or more processes.) Upon receiving requests from clients, it communicates via AMQP to the magnum-conductor process. (Currently magnum-conductor is limited to a single process but is intended to scale in the future.) [\[4\]][4]
 
-### 2.2. Components Used by Magnum
+### 2.2. OpenStack Components Used by Magnum
+Magnum utilizes the typical OpenStack services: Nova, Neutron, Glance, Cinder and one less typical service: Heat.
 
-Magnum uses the standard OpenStack projects and Heat for orchestration. Nodes of Magnum bays are normal Nova or Ironic instances.
-
-> Magnum uses Heat to orchestrate an OS image which contains Docker and Kubernetes [or Swarm or Mesos] and runs that image in either virtual machines or bare metal in a cluster configuration.
-
-In magnum you create *bays*. A bay is where your container orchestration software (Kubernetes, Swarm, Mesos) runs. Bays can contain multiple nodes. A bay is accessible to a single tenant. Bays with different engines can be run side by side so you're not locked-in to a single platform.
+Heat is an orchestration tool that allows for automating usage of the other OpenStack services. Magnum does not reinvent the wheel with orchestration, it adds another layer on top of Heat to further automate the creation of resources for container usage.
 
 ![Screenshot of Heat Stack in Horizon](./photos/magnum_heat.png)
+*Screenshot of Kubernetes Heat stack in Horizon.*
+
+### 2.2. Detail of Communication Flow
+Clients communicate requests to the magnum-api. The magnum-api sends all requests to magnum-conductor. For example, a request to create a bay will cause magnum-api to communicate with magnum-conductor which then communicates with Heat to create and setup the resources. Then magnum-conductor will communicate with Kubernetes, Swarm, or Docker after setup. For example, if a request comes in to create a Kuberentes pod, magnum-api will communicate with magnum-conductor to send those request to the Kubernetes engine which would then commicate with the Docker engine.
 
 ## 3. Installation
 Magnum can be installed in DevStack by enabling the plugin in your `local.conf`. `enable_plugin magnum https://git.openstack.org/openstack/magnum` The full details can be found [here](http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#exercising-the-services-using-devstack) The [Cloud Init](./cloud.init) file in this directory can be used to initialize a cloud machine with DevStack and Magnum.
@@ -210,12 +212,9 @@ magnum/
 `-- tools
 ```
 
-## 7. References
-<https://wiki.openstack.org/wiki/Magnum>  
-<http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#exercising-the-services-using-devstack>  
-<http://docs.openstack.org/developer/devstack/guides/single-vm.html>  
-<http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#using-kubernetes-bay>  
-<http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#building-and-using-a-swarm-bay>
+## 7. General References
+<https://wiki.openstack.org/wiki/Magnum>    
+<http://docs.openstack.org/developer/magnum/dev/quickstart.html#building-a-kubernetes-bay-based-on-fedora-atomic>
 <http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#using-kubernetes-bay>
 
 [1]: https://wiki.openstack.org/wiki/Magnum
