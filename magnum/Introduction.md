@@ -9,10 +9,10 @@ The usage of containers is rapidly increasing across different fields. Docker is
 
 To accomplish this Magnum uses the standard OpenStack projects (Nova, Neutron, Glance, Cinder) and the Heat orchestration project. Essentially Magnum works at the Heat level to automate the specific use case of creating Kubernetes or Swarm clusters.
 
-### 1.1 Purpose
+### 1.1. Purpose
 Magnum provides an API designed to manage app containers. It differs from Nova, Docker, Swarm, or Kubernetes but leverages all as components. It also differs from Nova-Docker or using the Docker resource in Heat directly. Magnum makes Docker containers first-class citizens on OpenStack.
 
-### 1.2 Terms
+### 1.2. Terms
 
 #### General
 
@@ -40,6 +40,12 @@ Container: A Docker container
 ## 2. Architecture
 ![Magnum Architecture Diagram](./photos/magnum_architecture.png)
 
+### 2.1. Components of Magnum
+
+The Magnum project is composed of three main components, the Magnum API and Magnum Conductor, and the CLI client.
+
+### 2.2. Components Used by Magnum
+
 Magnum uses the standard OpenStack projects and Heat for orchestration. Nodes of Magnum bays are normal Nova or Ironic instances.
 
 > Magnum uses Heat to orchestrate an OS image which contains Docker and Kubernetes [or Swarm or Mesos] and runs that image in either virtual machines or bare metal in a cluster configuration.
@@ -51,10 +57,11 @@ In magnum you create *bays*. A bay is where your container orchestration softwar
 ## Installation
 Magnum can be installed in DevStack by enabling the plugin in your `local.conf`. `enable_plugin magnum https://git.openstack.org/openstack/magnum` The full details can be found [here](http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#exercising-the-services-using-devstack) The [Cloud Init](./cloud.init) file in this directory can be used to initialize a cloud machine with DevStack and Magnum.
 
-*Details on full deployment coming soon.*
-
 ## CLI
 Magnum is used through the *magnum* Python client. To interact with bays (create pods, run containers, etc.) you use the magnum client, not the kubectl or docker-swarm clients. Here's a partial overview of the available commands.
+
+- add example of creating Kubernetes bay
+- add example of using Kubernetes bay
 
 ```
 baymodel-create     Create a baymodel.
