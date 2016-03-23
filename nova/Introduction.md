@@ -35,6 +35,12 @@ Explain overall picture of Nova
 
 **Compute**
 
+Compute manages communication with hypervisors and virtual machines.  You can create compute nodes that will receive requests from the controller node and virtual machine instances.  The compute service relies on a hypervisor to run virtual machine instances.  OpenStack can use a number of various hypervisors such as Docker, KVM or QEMU.
+
+The basics:  Compute will accept actions from the queue and then perform a series of system commands and carry them out while updating status in the database.
+
+While all services are designed to be horizontally scalable, you should have significantly more computes then anything else.
+
 **Conductor**
 
 **SQL Database**
