@@ -45,6 +45,8 @@ While all services are designed to be horizontally scalable, you should have sig
 
 **SQL Database**
 
+The Nova DB stores the current state of all objects in the compute cluster.  It can be done with any relational database - like MySQL or Postgre.  The Nova API talks to the database via SQLAlchemy which is a python Object Relational Mapper.
+
 
 ### 2.1  Interactions with other OpenStack Services ###
 
@@ -440,3 +442,5 @@ Reconstructs the image using a new image while maintaining its other properties
 [Container](http://searchservervirtualization.techtarget.com/definition/container-based-virtualization-operating-system-level-virtualization)
 
 [Fault tolerance](https://en.wikipedia.org/wiki/Fault_tolerance)
+
+[Nova DB](http://www.slideshare.net/mirantis/openstack-architecture-43160012)
