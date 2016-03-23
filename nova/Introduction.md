@@ -405,6 +405,8 @@ Reconstructs the image using a new image while maintaining its other properties
 
 **Container** - Container-based virtualization, also called operating system virtualization, is an approach to virtualization in which the virtualization layer runs as an application within the operating system (OS). In this approach, the operating system's kernel runs on the hardware node with several isolated guest virtual machines (VMs) installed on top of it. The isolated guests are called containers. 
 
+**Fault tolerance** - Fault tolerance is the property that enables a system to continue operating properly in the event of the failure of (or one or more faults within) some of its components.
+
 ## 6. Code Review ##
 
 ## 7. Code Contribution ##
@@ -428,4 +430,7 @@ Reconstructs the image using a new image while maintaining its other properties
 [Compute Node](http://ken.pepple.info/openstack/2011/04/22/openstack-nova-architecture/)
 
 [Bare metal server](http://searchservervirtualization.techtarget.com/definition/bare-metal-environment)
+
 [Container](http://searchservervirtualization.techtarget.com/definition/container-based-virtualization-operating-system-level-virtualization)
+
+[Fault tolerance](https://en.wikipedia.org/wiki/Fault_tolerance)
