@@ -18,6 +18,18 @@ Neutron is Openstack's Networking service provider. Main goals of Neutron are: -
 
 # Architecture
 
+<p>Neutron utilizing 3 main resources: - </p>
+
+<ul>
+  <li> Port - A connection point for attaching a single device NIC to neutron network.</li>
+  <li> Network - An isolated L2 segment similar to VLAN. It can also be defined as a broadcast domain.</li>
+  <li> Subnet - A block of IP addresses and associated configure state.</li>
+</ul>
+
+![Alt Text](https://github.com/cloudandbigdatalab/OpenStack-Projects/blob/master/neutron/netronCoreConcepts.JPG?raw=true) <br/>
+
+
+
 # Installation
 
 # CLI 
