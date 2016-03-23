@@ -1,0 +1,158 @@
+1. Introduction
+
+Ceilometer is a part of openstack Telemetry project and it provides Telemetry as a Service in openstack. The purpose of the openstack Telemetry project is to reliably collect data on the utilization of both physical and virtual resources and persist the collected data for subsequent retrieval and analysis to trigger actions when defined criteria are met. To achieve this Telemetry has currently following three projects:
+
+Aodh: an alarming service
+Gnocchi: a time-series database and resource indexing service
+Ceilometer: a data collection service
+
+Ceilometer service is used to collect the measurements on the utilization of the resources from OpenStack services and other external components, so that only one agent is needed to collect the similar data. Some examples of measurements are cpu utilization, memory utilization, instance type, bandwidth usage, power consumption etc. 
+
+The reason why we need to collect the measurements is primarily two fold. First applications and systems require monitoring in order to ensure continuous service delivery. So we need to know whether the applications and the infrastructure running these applications have encountered any faults, and whether they are experiencing heavy utilization.  Second, in industry, it is important to be able to monitor these services to develop a method for billing customers.
+
+Ceilometer is primarily focused on monitoring resource utilization across the cloud, although it does provide some alarming and notification functionality as well. Data collected by ceilometer can be used for capacity planning of resources, customer billing, chargeback, alarming capabilities across all OpenStack core components. as well as elastic scaling.  
+
+ 1. Objectives
+
+In 2012 when ceilometer project was started there was only a single objective to provide the infrastructure that will  collect any information regarding OpenStack projects, so that rating engines can use this single infrastructure as a source to transform the collected events into billable items which is labeled as “metering”. Later another objective was added to ceilometer, it is the way to collect meter, regardless of the purpose of the collection. For example, Ceilometer can now publish information for monitoring, debugging and graphing tools in addition or in parallel to the metering backend and this is labeled as “multi-publisher”.
+
+ 2. Billing: A Three step Process
+Metering: collect resource utilization data from different services
+Rating: Transform collected usage data into billable items 
+Billing: create invoice, based on the collected resource utilization data and rating
+
+2. Ceilometer System Architecture
+
+The major components of the Ceilometer architecture are the polling agents, notification agents,  collectors for storing agent results, alarm evaluators, alarm notifiers, and several different backend databases to store the measurements.
+
+Below are the different components in ceilometer architecture [2]:
+
+![alt tag](https://github.com/cloudandbigdatalab/OpenStack-Projects/blob/master/ceilometer/Fig1%20Ceilometer%20Architecture.png)
+Fig1: Ceilometer Architecture
+
+ 1. Components of Ceilometer
+
+There are two types of Ceilometer agents: polling agents  and notification agents.
+Polling Agents: The polling agents periodically request various metrics from different openstack services. For   example, the ceilometer-compute agent will run on a compute node and collects metrics related to compute node like cpu utilization. It is a daemon designed to poll OpenStack services and build Meters.
+
+Notification Agents: Notification agent's role is to listen on the message bus, and gather information about the inner workings of other OpenStack systems based on their notification outputs. It is a daemon designed to listen to notifications on message queue, convert them to Events and Samples, and apply pipeline actions.
+Collectors: The data collected by the agents is sent to the ceilometer-collectors, which is a daemon that transforms the collected data and record events and metering data into the backend databases. There may be several different databases used, based upon the different types of data. 
+
+API: Used to query and view data recorded by the collector in internal full-fidelity DB (if enabled).
+Alarm Evaluators: The Alarm Evaluator is configured to look at the data in the system and evaluate whether alarming criteria are met. These criteria need to defined and manually configurable. 
+
+Alarm Notifiers: Once the defined criteria is met, then Alarm Notifier will take an action based upon the raised alarm. This could be calling a specific URL, or another user defined action.
+
+Data Collected by ceilometer can be used by other services. For example Gnocchi and Aodh. As ceilometer has grown to capture more data, it became apparent that data storage would need to be optimised. This database optimization is handled by Gnocchi. Gnocchi is intended to replace the existing metering database interface [2]. Similarly Aodh, an alarming service was introduced and making ceilometer more modular and efficient for maintaining.
+
+ 2. Ceilometer Architecture with Billing
+
+Below is the Ceilometer architectural diagram with billing and Rating System: 
+
+![alt tag](https://github.com/cloudandbigdatalab/OpenStack-Projects/blob/master/ceilometer/Fig2%20Ceilometers%20Architecture%20with%20Billing%20and%20Rating%20System.png)
+Fig2: Ceilometers Architecture with Billing and Rating System[4]
+The above image explains how billing and rating system uses the data collected by ceilometer for generating customer invoice. Billing and Rating system will interact with Ceilometer through a RESTful API call and gets the data related to resource utilization and service utilizations across all the openstack services. Based on this data customer invoice is generated by billing and rating system. 
+
+In the above architecture, a compute node agent runs on each compute node and polls for resource utilization data and a central agent runs on a central management server to poll for the resources utilization statistics which are not tied to instances or compute nodes. It also contains a collector, which runs on one or more central management servers to monitor the message queues. Notification messages are processed and turned into metering messages and sent back out onto the message bus and then metering measurements are written to the data store.
+ 
+ 3. Ceilometer Work Flow
+
+Collect data on resource utilizations from OpenStack components 
+Transform the collected metering data 
+Publish meters to any destination (including Ceilometer itself) 
+Store received meters into database
+Aggregate samples via a REST API
+
+3. How Ceilometer works
+
+In Ceilometer, polling agents will be running across every compute node and also actively listening to notifications on the central notifications message bus where a central server collects the raw metering metrics. In addition, the central server collects usage and utilization metrics from other resources that are not tied to a specific node. This central server acts as a collector which monitors the queues of messages that are sent by the agents and buses. After the messages are processed, they are then stored in a dedicated database server that supports intensive write operations.
+
+ 1. Data Collection
+
+Below is the image that describes how data is collected in ceilometer using collectors and agents:
+
+![alt tag](https://github.com/cloudandbigdatalab/OpenStack-Projects/blob/master/ceilometer/Fig3%20Data%20Collection%20in%20Ceilometer.png)
+Fig3: Data Collection in Ceilometer[5]
+
+Each and every project that you want to collect the data should send events on the Oslo bus about resource utilization. But not all projects have implemented this and you will often need to instrument other tools which may not use the same bus as OpenStack has defined. 
+
+The Ceilometer project created 2 methods to collect data:
+
+Bus listener agent (Notification Agents): It takes events generated on the notification bus and transforms them into Ceilometer samples. This is the preferred method of data collection . Here notification daemon (agent-notification) is the main component, which monitors the message bus for data being provided by other OpenStack components such as Nova, Glance, Cinder, Neutron, Swift, Keystone, and Heat, as well as Ceilometer internal communication [5]. 
+
+Polling agents: This is the less preferred method, will poll some API or other tool to collect information at a regular interval. Where the option exists to gather the same data by consuming notifications, then the polling approach is less preferred due to the load it can impose on the API services. The polling agent daemon is configured to run one or more pollster plugins using either the ceilometer.poll.compute and/ or ceilometer.poll.compute namespaces [5].
+
+The first method is supported by the ceilometer-notification agent, which monitors the message queues for notifications. Polling agents can be configured either to poll local hypervisor or remote APIs[5].
+
+ 2. Processing the data
+
+The collected data is transformed according to the requirements of the publisher and published. This processing of data is performed by pipeline.
+
+![alt tag](https://github.com/cloudandbigdatalab/OpenStack-Projects/blob/master/ceilometer/Fig4%20Processing%20of%20data%20using%20pipeline%20.png)
+Fig4: Processing of data using pipeline [5]
+
+ 3. Publishing the data
+
+Processed data can be published using:
+Notifier, a notification based publisher which pushes samples to a message queue which can be consumed by the collector or an external system. 
+UDP, which publishes samples using UDP packets
+kafka, which publishes data to a Kafka message queue to be consumed by any system that supports Kafka.
+
+![alt tag](https://github.com/cloudandbigdatalab/OpenStack-Projects/blob/master/ceilometer/Fig5%20publishing%20the%20processed%20data.png)
+Fig5: publishing the processed data [5]
+
+ 4. Storing the data
+
+The collector daemon gathers the processed event and metering data captured by the notification and polling agents. It validates the incoming data and (if the signature is valid) then writes the messages to a declared target: database, file, or http [5]. Currently default database for storing in ceilometer is Mongodb. It also supports SQL databases and HBase databases. 
+
+ 5. Accessing the data
+
+Data can be directly accessed by querying the underlying databases but schemas may change . So this is not the preferred method for accessing data. Better way is to access via RESTful API calls. 
+
+![alt tag](https://github.com/cloudandbigdatalab/OpenStack-Projects/blob/master/ceilometer/Fig6%20Accessing%20data%20by%20external%20systems.png)
+Fig6: Accessing data by external systems [5]
+
+4. Installation
+By default, ceilometer is not enabled in the devstack environment, so we need to follow below steps to configure it before we use it:
+
+1. Download devstack. (if devstack is not installed)
+
+2. Create a local.conf file as input to devstack.
+
+3. Ceilometer makes extensive use of the messaging bus, but has not yet been tested with ZeroMQ. We recommend using Rabbit for now. By default, RabbitMQ will be used by devstack.
+
+4. The ceilometer services are not enabled by default, so they must be enabled in local.conf before running stack.sh.
+
+5. This example local.conf file shows all of the settings required for ceilometer:
+
+```[[local|localrc]]
+ Enable the Ceilometer devstack plugin
+enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer.git
+```
+
+6. Nova does not generate the periodic notifications for all known instances by default. To enable these auditing events, set instance_usage_audit to true in the nova configuration file and restart the service.
+
+7. Cinder does not generate notifications by default. To enable these auditing events, set the following in the cinder configuration file and restart the service:
+
+```notification_driver=messagingv2```
+
+
+5. Using CLI 
+* Displaying Meters
+```   ceilometer meter-list ```
+
+
+
+
+
+6. References:
+
+[1] most of the content is taken after reading  http://docs.openstack.org/developer/ceilometer/
+[2] http://docs.openstack.org/developer/ceilometer/_images/ceilo-gnocchi-arch.png
+[3] http://www.slideshare.net/NicolasBarcet/ceilometer-heatequalsalarming-icehousesummit
+[4]http://image.slidesharecdn.com/oscon132-130528180211-phpapp02/95/metering-and-billing-for-cloud-services-9-638.jpg?cb=1369995171
+[5] http://docs.openstack.org/developer/ceilometer/_images/1-agents.png
+[6] http://docs.openstack.org/developer/ceilometer/architecture.html
+
+[7] https://www.rdoproject.org/install/ceilometerquickstart/
+
