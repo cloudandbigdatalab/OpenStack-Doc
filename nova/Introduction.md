@@ -9,6 +9,7 @@
 	- 2.2) Messaging
 	- 2.3) Filter Schedule
 	- 2.4) Threading Model
+	- 2.5) Block Device Mapping
 - 3) Installation
 	- 3.1) Installing Nova from DevStack Source
 	- 3.2) Installing Nova from Packages 
@@ -98,6 +99,35 @@ The weighing process is defined by equations which can also be set by the user. 
 ### 2.4 Threading Model ###
 
 All OpenStack services use green thread model of threading, implemented through using the Python eventlet and greenlet libraries. Green threads emulate real threading without relying on any native OS capabilities, they are managed completely in user space instead of kernel space, which allows them to work in environments that do not have native thread support. They use a cooperative model of threading, meaning context switches only occur when specific eventlet or greenlet library calls are made. It is important to keep in mind that there is only one operating system thread per service, so any call that blocks the main thread will block the entire process.
+
+### 2.5 Block Device Mapping ###
+
+In nova, each instance can have a variety of block devices available to it, depending on the deployment. Limitations can be set for certain users or tenants for each instance. Block device mapping is a way to organize and keep data about all the block devices an instance has.
+
+Block device mapping usually refers to one of two things. First, the API or CLI structure and syntax required to specify which block devices for an instance boot. Second, the internal data structure inside nova that is used for recording and keeping in a block device mapping table.
+
+There have been a variety of implementations for this that have all had their issues, however the most recent and currently used is Block Device Mapping v2.
+
+This new block device mapping is a list of dictionaries containing the following fields (in addition to the ones that were already there):
+
+- source_type - this can have one of the following values:
+  - image
+  - volume
+  - snapshot
+  - blank
+- dest_type - this can have one of the following values:
+  - local
+  - volume
+
+Combination of the above two fields would define what kind of block device the entry is referring to. The following combinations are supported. Nova will do validation to ensure the requested mapping is valid before accepting a boot request.
+
+- image -> local: this is only currently reserved for the entry referring to the Glance image that the instance is being booted with 
+- volume -> volume: Cinder volume to be attached to the instance, can be marked as a boot device.
+- snapshot -> volume: creates a volume from a Cinder volume snapshot and attach that volume to the instance, can be marked bootable.
+- image -> volume: Download a Glance image to a cinder volume and attach it to an instance, can also be marked as bootable
+- blank -> volume: Creates a blank Cinder volume and attaches it
+- blank -> local - Depending on the guest_format field, this will either mean an ephemeral blank disk on hypervisor local storage, or a swap disk
+
 
 
 
