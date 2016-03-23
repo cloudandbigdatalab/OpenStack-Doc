@@ -399,11 +399,17 @@ Reconstructs the image using a new image while maintaining its other properties
     
     Example:  ip netns exec qdhcp-0ffaa6c5-4fe3-4758-9b67-5bbe558f7c15 ssh -i test.pem cirros@10.0.0.4
 
-## 5. Code Review ##
+## 5. Definitions ##
 
-## 6. Code Contribution ##
+**Bare metal Server** - A bare metal environment is a computer system or network in which a virtual machine is installed directly on hardware rather than within the host operating system (OS). The term "bare metal" refers to a hard disk, the usual medium on which a computer's OS is installed.
 
-## 7. References ##
+**Container** - Container-based virtualization, also called operating system virtualization, is an approach to virtualization in which the virtualization layer runs as an application within the operating system (OS). In this approach, the operating system's kernel runs on the hardware node with several isolated guest virtual machines (VMs) installed on top of it. The isolated guests are called containers. 
+
+## 6. Code Review ##
+
+## 7. Code Contribution ##
+
+## 8. References ##
 
 [Introduction - Webopedia](http://www.webopedia.com/TERM/O/openstack-nova.html)
 
@@ -420,3 +426,6 @@ Reconstructs the image using a new image while maintaining its other properties
 [Compute Node](http://blog.flux7.com/blogs/openstack/tutorial-what-is-nova-and-how-to-install-use-it-openstack)
 
 [Compute Node](http://ken.pepple.info/openstack/2011/04/22/openstack-nova-architecture/)
+
+[Bare metal server](http://searchservervirtualization.techtarget.com/definition/bare-metal-environment)
+[Container](http://searchservervirtualization.techtarget.com/definition/container-based-virtualization-operating-system-level-virtualization)
