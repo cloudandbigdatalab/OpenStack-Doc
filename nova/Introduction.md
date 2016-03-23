@@ -450,3 +450,5 @@ Reconstructs the image using a new image while maintaining its other properties
 [Nova DB](http://www.slideshare.net/mirantis/openstack-architecture-43160012)
 
 [Keystone Interaction](http://essentials.cloudtrain.me/)
+
+[Keystone Token](http://docs.openstack.org/liberty/config-reference/content/keystone-configuration-file.html)
