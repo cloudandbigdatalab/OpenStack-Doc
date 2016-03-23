@@ -33,6 +33,14 @@ As the most distributed component in the OpenStack platform, Nova interacts heav
 
 **Scheduler**
 
+**Notifications**
+
+Similarly to other OpenStack services Nova emits notifications to the message bus with the Notifier class provided by oslo.messaging. From the notification consumer point of view a notification consists of two parts: an envelope with a fixed structure defined by oslo.messaging and a payload defined by the service emitting the notification. 
+
+There are two types of notifications in Nova: legacy notifications which have an unversioned payload and newer notifications which have a versioned payload.
+
+The versioned notification concept is created to fix the shortcomings of the unversioned notifications. The envelope structure of the emitted notification is the same as in the unversioned notification case as it is provided by oslo.messaging. However the payload is not a free form dictionary but a serialized oslo versionedobject.
+
 **Compute**
 
 Compute manages communication with hypervisors and virtual machines.  You can create compute nodes that will receive requests from the controller node and virtual machine instances.  The compute service relies on a hypervisor to run virtual machine instances.  OpenStack can use a number of various hypervisors such as Docker, KVM or QEMU.
@@ -43,9 +51,578 @@ While all services are designed to be horizontally scalable, you should have sig
 
 **Conductor**
 
+In addition to its roles as a database proxy and object backporter the conductor service also serves as a centralized place to manage the execution of workflows which involve the scheduler. Rebuild, resize/migrate, and building an instance are managed here. This was done in order to have a better separation of responsibilities between what compute nodes should handle and what the scheduler should handle, and to clean up the path of execution. Conductor was chosen because in order to query the scheduler in a synchronous manner it needed to happen after the API had returned a response otherwise API response times would increase. And changing the scheduler call from asynchronous to synchronous helped to clean up the code.
+
+This new process means the scheduler only deals with scheduling, the compute only deals with building an instance, and the conductor manages the workflow. The code is now cleaner in the scheduler and computes.
+
+Aims to enable “No DB” compute
+
+- Remove direct DB access from compute service
+- Compute nodes are least trusted component
+- Direct DB access complicates upgrades
+
+Layer on top of the compute service
+
+- Abstracts all direct DB access away from compute nodes
+- Can be scaled horizontally, similar to nova-api or nova-scheduler
+- Should not be run on compute nodes (eliminates security benefit)
+
 **SQL Database**
 
 The Nova DB stores the current state of all objects in the compute cluster.  It can be done with any relational database - like MySQL or Postgre.  The Nova API talks to the database via SQLAlchemy which is a python Object Relational Mapper.
+
+**Host Aggregates**
+Host aggregates can be regarded as a mechanism to further partition an availability zone. Host aggregates provide a mechanism to allow administrators to assign key-value pairs to groups of machines. Each node can have multiple aggregates, each aggregate can have multiple key-value pairs, and the same key-value pair can be assigned to multiple aggregates. This information can be used in the scheduler to enable advanced scheduling, to set up xen hypervisor resources pools or to define logical groups for migration.
+
+****Availability Zones (AZs)****
+
+Availability Zones are the end-user visible logical abstraction for partitioning a cloud without knowing the physical infrastructure. The availability zone is actually a specific metadata information attached to an aggregate. Adding that specific metadata to an aggregate makes the aggregate visible from an end-user perspective and consequently allows to schedule upon a specific set of hosts (the ones belonging to the aggregate).
+
+That said, there are a few rules to know that diverge from an API perspective between aggregates and availability zones:
+
+* one host can be in multiple aggregates, but it can only be in one availability zone
+* by default a host is part of a default availability zone even if it doesn’t belong to an aggregate (the configuration option is named default_availability_zone)
+
+****Xen Pool Host Aggregates****
+
+Originally all aggregates were Xen resource pools, now an aggregate can be set up as a resource pool by giving the aggregate the correct key-value pair.
+You can use aggregates for XenServer resource pools when you have multiple compute nodes installed (only XenServer/XCP via xenapi driver is currently supported), and you want to leverage the capabilities of the underlying hypervisor resource pools.
+
+****Design****
+
+The OSAPI Admin API is extended to support the following operations:
+
+Aggregates
+
+- list aggregates: returns a list of all the host-aggregates (optionally filtered by availability zone)
+
+- create aggregate: creates an aggregate, takes a friendly name, etc. returns an id
+- show aggregate: shows the details of an aggregate (id, name, availability_zone, hosts and metadata)
+- update aggregate: updates the name and availability zone of an aggregate
+- set metadata: sets the metadata on an aggregate to the values supplied
+- delete aggregate: deletes an aggregate, it fails if the aggregate is not empty
+- add host: adds a host to the aggregate
+- remove host: removes a host from the aggregate
+
+Hosts
+
+- start host maintenance (or evacuate-host): disallow a host to serve API requests and migrate instances to other hosts of the aggregate
+- stop host maintenance: (or rebalance-host): put the host back into operational mode, migrating instances back onto that host
+
+
+###2.2) Virtual Machine States and Transitions###
+
+****Allowed State Transitions****
+
+![](http://docs.openstack.org/developer/nova/_images/graphviz-aa3b50f03fc95e5ea0896d5f2c606d809e3e2741.png)
+
+****Requirements for Commands****
+
+![](http://i195.photobucket.com/albums/z7/BrandonIzzy/reqCmds_zpsklfqiwvw.png)
+
+****VM states and Possible Commands****
+
+![](http://i195.photobucket.com/albums/z7/BrandonIzzy/statesAndCmds_zpsqigexi5x.png)
+
+****Create Instance States****
+
+The following diagram shows the sequence of VM states, task states, and power states when a new VM instance is created.
+
+![](http://docs.openstack.org/developer/nova/_images/create_vm_states.svg) 
+
+
+
+
+
+###2.5) Internalization###
+
+Nova uses the oslo.i18n library to support internationalization. The oslo.i18n library is built on top of gettext and provides functions that are used to enable user-facing strings such as log messages to appear in the appropriate language in different locales.
+
+###2.6) Nova REST API###
+
+This is the Nova component that receives HTTP requests, converts commands and communicates with other components via the oslo.messaging queue or HTTP.
+
+****List API versions****
+
+Lists information about all Compute API versions.
+
+- Lists information for all API versions. (GET)
+
+
+****Servers (servers)****
+
+Lists, creates, shows details for, updates, and deletes servers. (For the OpenStack Compute API, a server is a virtual machine (VM) instance, a physical machine or a container.) 
+
+- List servers (GET)
+- Create server (POST)
+- List details for servers (GET)
+- Show server details (GET)
+- Update server (PUT)
+- Delete server (DELETE)
+
+
+****Servers multiple create (servers)****
+
+Creates one or more servers.
+
+- Create multiple servers (POST)
+- Create multiple servers with reservation ID (POST)
+
+****Servers - run an action (servers, action)****
+
+- Enables all users to performs an action on a server. 
+- Add (associate) fixed IP (addFixedIp action) (POST)
+- Add (associate) floating IP (addFloatingIp action) (POST)
+- Change administrative password (changePassword action) (POST)
+- Confirm resized server (confirmResize action) (POST)
+- Create image (createImage action) (POST)
+- Evacuate server (evacuate action) (POST)
+- Force-delete server (forceDelete action) (POST)
+- Lock server (lock action) (POST)
+- Pause server (pause action) (POST)
+- Show console output (os-getConsoleOutput action) (POST)
+- Get RDP console (os-getRDPConsole action) (POST)
+- Get serial console (os-getSerialConsole action) (POST)
+- Get SPICE console (os-getSPICEConsole action) (POST)
+- Get VNC console (os-getVNCConsole action) (POST)
+- Reboot server (reboot action) (POST)
+- Rebuild server (rebuild action) (POST)
+- Remove (disassociate) fixed IP (removeFixedIp action) (POST)
+- Remove (disassociate) floating IP (removeFloatingIp action) (POST)
+- Rescue server (rescue action) (POST)
+- Resize server (resize action) (POST)
+- Restore soft-deleted instance (restore action) (POST)
+- Resume suspended server (resume action) (POST)
+- Revert resized server (revertResize action) (POST)
+- Shelve server (shelve action) (POST)
+- Shelf-offload (remove) server (shelveOffload action) (POST)
+- Start server (os-start action) (POST)
+- Stop server (os-stop action) (POST)
+- Unlock server (unlock action) (POST)
+- Unpause server (unpause action) (POST)
+- Unrescue server (unrescue action) (POST)
+- Unshelve (restore) shelved server (unshelve action) (POST)
+- Add security group to a server (addSecurityGroup action) (POST)
+- Remove security group from a server (removeSecurityGroup action) (POST)
+- Servers - run an administrative action (servers, action) (POST)
+- Create server back up (createBackup action) (POST)
+- Inject network information (injectNetworkInfo action) (POST)
+- Migrate server (migrate action) (POST)
+- Live-migrate server (os-migrateLive action) (POST)
+- Reset networking on a server (resetNetwork action) (POST)
+- Reset server state (os-resetState action) (POST)
+
+****Servers - run an administrative action (servers, action)****
+
+- Create server back up (createBackup action) (POST)
+- Inject network information (injectNetworkInfo action) (POST)
+- Migrate server (migrate action) (POST)
+- Live-migrate server (os-migrateLive action) (POST)
+- Reset networking on a server (resetNetwork action) (POST)
+- Reset server state (os-resetState action) (POST)
+
+****Servers diagnostics (servers, diagnostics)****
+
+Shows the usage data for a server.
+
+- Show server diagnostics (GET)
+
+****Servers IPs (servers, ips)****
+
+Lists the IP addresses for an instance and shows details for an IP address.
+
+- List IPs (GET)
+- Show IP details (GET)
+
+****Server metadata (servers, metadata)****
+
+Lists metadata, creates or replaces one or more metadata items, and updates one or more metadata items for a server. Also shows details for, creates or replaces, and updates a metadata item, by key, for a server.
+
+- List all metadata (GET)
+- Create or replace metadata items (PUT)
+- Update metadata items (POST)
+- Show metadata item details (GET)
+- Create or update metadata item (PUT)
+- Delete metadata item (DELETE)
+
+****Servers - list actions (servers, os-instance-actions)****
+
+All users can list available actions for a server and they can show details for a server action; however, only administrators can view server events in server action details.
+
+- List actions for server (GET)
+- Show server action details (GET)
+
+****Port interfaces (servers, os-interface)****
+
+Creates a port interface and uses it to attach a port to a server and detaches a port interface from a server. Also, lists all port interfaces and shows details for a port interface.
+
+- Create interface (POST)
+- List port interfaces (GET)
+- Show port interface details (GET)
+- Detach interface (DELETE)
+
+****Servers virtual interfaces (servers, os-virtual-interfaces)****
+
+Lists virtual interfaces for a server instance.
+
+- List virtual interfaces (GET) 
+
+****Servers with volume attachments (servers, os-volume_attachments)****
+
+Attaches volumes that are created through the volume API to server instances. Also, lists volume attachments for a server instance, shows details for a volume attachment, and detaches a volume.
+
+- Attach volume to server (POST)
+- List volume attachments (GET)
+- Show volume attachment details (GET)
+- Detach volume (DELETE)
+
+****Flavors with extended attributes (flavors)****
+
+Shows information about flavors.
+
+- List flavors(GET)
+- Create flavor (POST)
+- Show flavor details (GET)
+- Delete flavor (DELETE)
+- List flavors with details (GET)
+
+****Flavors access (flavors, os-flavor-access, action)****
+
+Lists tenants who have access to a private flavor and adds private flavor access to and removes private flavor access from tenants. By default, only administrators can manage private flavor access. 
+
+- List flavor access information for given flavor (GET)
+- Add flavor access to tenant (POST)
+- Remove flavor access from tenant (POST)
+
+****Flavors extra-specs (flavors, os-flavor-extra-specs)****
+
+Lists, creates, deletes, and updates the extra-specs or keys for a flavor.
+
+- Create extra specs for a flavor (POST)
+- List extra specs for a flavor (GET)
+- Show an extra spec for a flavor (GET)
+- Update an extra spec for a flavor (PUT)
+- Delete an extra spec for a flavor (DELETE)
+
+****Keypairs (keypairs)****
+
+Generates, imports, and deletes SSH keys.
+
+- List keypairs (GET)
+- Create or import keypair (POST)
+- Delete keypair (DELETE)
+- Show keypair details (GET) 
+
+****Limits (limits)****
+
+Shows rate and absolute limits for the tenant.
+
+- Show rate and absolute limits (GET) 
+
+****Extensions (extensions)****
+
+Lists available extensions and shows information for an extension, by alias.
+( Extensions are deprecated in Compute API v2.1. , and supported in v2.0.  )
+
+- List extensions (GET)
+- Show extension details (GET)
+
+****Images****
+
+Lists, shows details for, and deletes images. Also sets, lists, shows details for, and deletes image metadata.
+
+- List images (GET)
+- List images details (GET)
+- Show image details (GET)
+- Delete image (DELETE)
+
+****Image metadata****
+
+Shows details for, sets, updates, and deletes image metadata or metadata items.
+
+- Show image metadata (GET)
+- Create or replace image metadata (PUT)
+- Update image metadata items (POST)
+- Show image metadata item details (GET)
+- Create or update image metadata item (PUT)
+- Delete image metadata item (DELETE)
+
+****Guest agents (os-agents)****
+
+Creates, lists, updates, and deletes guest agent builds. Use guest agents to access files on the disk, configure networking, or run other applications or scripts in the guest while the agent runs. (Use of guest agents is possible only if the underlying service provider uses the Xen driver.)
+
+- Create agent build(POST)
+- List agent builds(GET)
+- Delete agent build(DELETE)
+- Update agent build(PUT) 
+
+****Host aggregates (os-aggregates, action)****
+
+Creates and manages host aggregates. An aggregate assigns metadata to groups of compute nodes. Aggregates are only visible to the cloud provider.
+
+- Create aggregate(POST)
+- List aggregates (GET)
+- Show aggregate details (GET)
+- Delete aggregate (DELETE)​
+- Update aggregate (PUT)
+- Add host (POST)
+- Create or update aggregate metadata (POST)
+- Remove host (POST)
+
+****Assisted volume snapshots (os-assisted-volume-snapshots)****
+
+Creates and deletes snapshots through an emulator/hypervisor. 
+
+- Create assisted volume snapshots(POST)
+- Delete assisted volume snapshot(DELETE)
+ 
+****Availability zones (os-availability-zone)****
+
+Shows availability zone information.
+
+- Get availability zone information (GET)
+- Get detailed availability zone information (GET)
+
+****Bare metal nodes (os-baremetal-nodes)****
+
+Bare metal nodes.
+
+- Add bare metal node (POST)
+- List bare metal nodes (GET)
+- Add interface to bare metal node (POST)
+- Delete interface from bare metal node (POST)
+- Show bare metal node details (GET)
+- Delete bare metal node (DELETE)
+
+****Cells (os-cells, capacities)****
+
+Adds neighbor cells, lists neighbor cells, and shows the capabilities of the local cell.
+
+- List cells (GET)
+- List cells with details (GET)
+- Show cell data (GET)
+- Show cell capacities (GET)
+
+****Root certificates (os-certificates)****
+
+Creates and shows details for a root certificate.
+
+- Create certificate (POST)
+- Show certificate details (GET)
+
+****Cloudpipe (os-cloudpipe)****
+
+Manages virtual VPNs for projects.
+
+- List cloudpipes (GET)
+- Create cloudpipe (POST)
+- Update cloudpipe (POST)
+
+****Server consoles (servers, os-consoles, os-console-auth-token)****
+
+Manages server consoles.
+
+- Create console(POST)
+- Lists consoles (GET)
+- Show console details (GET)
+- Delete console (DELETE)
+- Show console authentication token (GET)
+
+****Fixed IPs (os-fixed-ips)****
+
+Shows data for a fixed IP, such as host name, CIDR, and address. Also, reserves and frees a fixed IP address.
+
+- Show fixed IP details (GET)
+- Reserve or release a fixed IP (POST)
+
+****Floating IP DNS records (os-floating-ip-dns)****
+
+Manages DNS records associated with floating IP addresses. The API dispatches requests to a DNS driver that is selected at startup.
+
+- List DNS domains (GET)
+- Create or update DNS domain (PUT)
+- Delete DNS domain (DELETE)
+- Create or update DNS entry (PUT)
+- Find unique DNS entry (GET)
+- Delete DNS entry (DELETE)
+- List DNS entries (GET)
+
+****Floating IP pools (os-floating-ip-pools)****
+
+Manages groups of floating IPs.
+
+- List floating IP pools (GET)
+
+****Floating IPs (os-floating-ips)****
+
+Lists floating IP addresses for a project. Also, creates (allocates) a floating IP address for a project, shows floating IP address details, and deletes (deallocates) a floating IP address from a project.
+
+- List floating IP addresses (GET)
+- Create (allocate) floating IP address (POST)
+- Show floating IP address details (GET)
+- Delete (deallocate) floating IP address (DELETE) 
+
+****Floating IPs bulk (os-floating-ips-bulk)****
+
+(nova-network only) Bulk-creates, deletes, and lists floating IPs. Default pool name is nova.
+
+To view available pools, use the os-floating-ip-pools extension.
+
+- List floating IPs (GET)
+- Create floating IPs (POST)
+- Bulk-delete floating IPs (POST)
+- List floating IPs by host (GET)
+
+****Ping instances (os-fping)****
+
+Pings instances and reports which ones are alive.
+
+- Ping instances (GET)
+- Ping an instance (GET)
+
+****Hosts (os-hosts)****
+
+Manages physical hosts. 
+
+- List hosts (GET)
+- Enable host (POST)
+- Show host details (GET)
+- Reboot host (GET)
+- Shut down host (GET)
+- Start host (GET)
+
+****Hypervisors (os-hypervisors)****
+
+Lists all hypervisors, shows summary statistics for all hypervisors over all compute nodes, shows details for a hypervisor, and shows the uptime for a hypervisor.
+
+- List hypervisors (GET)
+- Show hypervisor statistics (GET)
+- Show hypervisor details (GET)
+- Show hypervisor uptime (GET)
+
+****Instance usage audit log (os-instance-usage-audit-log)****
+
+Administrator only. Monitors task logs.
+
+- List usage audits for an instance (GET)
+- List usage audits before specified time (GET)
+
+****Migrations (os-migrations)**** 
+
+Shows data on migrations.
+
+- List migrations(GET)
+
+****Networks (os-networks)****
+
+Creates, lists, shows information for, and deletes networks. Adds a network to a project, disassociates a network from a project, and disassociates a project from a network.
+
+Associates host with and disassociates host from a network.
+
+- Create network (POST)
+- List networks (GET)
+- Add network (POST)
+- Show network details (GET)
+- Delete network (DELETE)
+- Associate host (POST)
+- Disassociate host (POST)
+- Disassociate network (POST)
+- Disassociate project (POST)
+
+****Quota class (os-quota-class-sets)****
+
+Provides quota classes management support.
+
+- Show quota (GET)
+- Update quota (PUT)
+
+****Quota sets (os-quota-sets)****
+
+Permits administrators, depending on policy settings, to view default quotas, view details for quotas, revert quotas to defaults, and update the quotas for a project or a project and user.
+
+- Update quotas (PUT)
+- Revert quotas to defaults (DELETE)
+- List default quotas for tenant (GET)
+- List quotas with details (GET) 
+
+****Security groups (os-security-groups)****
+
+Lists, shows information for, creates, and deletes security groups.
+
+- List security groups (GET)
+- Create security group (POST)
+- Show security group details (GET)
+- Update security group (PUT)
+- Delete security group (DELETE)
+- List security groups by server (GET)
+ 
+****Rules for default security group (os-security-group-default-rules)****
+
+Lists, shows information for, and creates default security group rules.
+
+- List default security group rules (GET)
+- Create default security group rule (POST)
+- Show default security group rule details (GET)
+- Delete default security group rule (DELETE) 
+
+****Rules for security group (os-security-group-rules)****
+
+Creates and deletes security group rules.
+
+- Create security group rule (POST)
+- Delete security group rule (DELETE)
+
+****Create external events (os-server-external-events)****
+
+Creates one or more external events. The API dispatches each event to a server instance.
+
+- Run events (POST).
+ 
+****Server groups (os-server-groups)****
+
+Lists, shows information for, creates, and deletes server groups.
+
+- List server groups (GET)
+- Create server group (POST)
+- Show server group details (GET)
+- Delete server group (DELETE)
+ 
+****Usage reports (os-simple-tenant-usage)****
+
+Reports usage statistics on compute and storage resources.
+
+- List tenant usage for all tenants (GET)
+- Show usage details for tenant (GET)
+
+****Project networks (os-tenant-networks)****
+
+Creates, lists, shows information for, and deletes project networks.
+
+- Create project network (POST)
+- List project networks (GET)
+- Show project network details (GET)
+- Delete project network (DELETE)
+- Associate host (POST)
+- Disassociate host (POST)
+- Disassociate network(POST)
+- Disassociate project (POST)
+
+****Volume extension (os-volumes, os-snapshots)****
+
+Manages volumes and snapshots for use with the Compute API.
+
+- List volumes (GET)
+- Create volume (POST)
+- List volumes with details (GET)
+- Show volume details (GET)
+- Delete volume (DELETE)
+- List volume types (GET)
+- Show volume type details (GET)
+- Create snapshot (POST)
+- List snapshots (GET)
+- List snapshots with details (GET)
+- Show snapshot details (GET)
+- Delete snapshot (DELETE)
 
 
 ### 2.1  Interactions with other OpenStack Services ###
