@@ -172,7 +172,9 @@ Creating Identity Service:
 ## References: 
 
 http://docs.openstack.org/cli-reference/openstack.html
+
 http://docs.openstack.org/cli-reference/keystone.html
+
 http://docs.openstack.org/developer/python-keystoneclient/
 
 
