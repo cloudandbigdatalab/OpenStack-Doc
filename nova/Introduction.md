@@ -10,9 +10,10 @@
   - 4.1) Managing Nova
   - 4.2) Managing Instances
   - 4.3) Accessing Instances
-- 5) Code Review
-- 6) Code Contribution
-- 7) References
+- 5) Definitions
+- 6) Code Review
+- 7) Code Contribution
+- 8) References
 
 ## 1. Introduction ##
 
