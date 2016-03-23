@@ -85,6 +85,12 @@ The weighing process is defined by equations which can also be set by the user. 
 ![Weighing]
 (http://docs.openstack.org/developer/nova/_images/filteringWorkflow2.png)
 
+### 2.3 Threading Model ###
+
+All OpenStack services use green thread model of threading, implemented through using the Python eventlet and greenlet libraries. Green threads emulate real threading without relying on any native OS capabilities, they are managed completely in user space instead of kernel space, which allows them to work in environments that do not have native thread support. They use a cooperative model of threading, meaning context switches only occur when specific eventlet or greenlet library calls are made. It is important to keep in mind that there is only one operating system thread per service, so any call that blocks the main thread will block the entire process.
+
+
+
 **Notifications**
 
 Similarly to other OpenStack services Nova emits notifications to the message bus with the Notifier class provided by oslo.messaging. From the notification consumer point of view a notification consists of two parts: an envelope with a fixed structure defined by oslo.messaging and a payload defined by the service emitting the notification. 
