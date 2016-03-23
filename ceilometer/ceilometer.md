@@ -215,7 +215,7 @@ By default, ceilometer is not enabled in the devstack environment, so we need to
 
 **Example of meter-list:**
 
-    ```
+```
    $ ceilometer meter-list
    +----------------------------+------------+-----------+---------------+-----------+--------------+
    | Name                       | Type       | Unit      | Resource ID   | User ID   | Project ID   |
@@ -230,7 +230,7 @@ By default, ceilometer is not enabled in the devstack environment, so we need to
    | disk.ephemeral.size        | gauge      | GB        | INSTANCE_ID_3 | USER_ID_C | PROJECT_ID_Z |
    | ... [snip]                                                                                     |
    +----------------------------+------------+-----------+---------------+-----------+--------------+
-    ```
+```
 
 * Using Aggregate Statistics:
 * Individual data points for a particular meter may be aggregated into consolidated statistics via the CLI statistics command:
