@@ -233,11 +233,25 @@ By default, ceilometer is not enabled in the devstack environment, so we need to
 ```
 
 * Using Aggregate Statistics:
+```
+   $ ceilometer statistics --meter cpu_util
+   +--------+--------------+------------+-------+------+-----+-----+-----+----------+----------------+----
+   | Period | Period Start | Period End | Count | Min  | Max | Sum | Avg | Duration | Duration Start | ...
+   +--------+--------------+------------+-------+------+-----+-----+-----+----------+----------------+----
+   | 0      | PERIOD_START | PERIOD_END | 2024  | 0.25 | 6.2 | 550 | 2.9 | 85196.0  | DURATION_START | ...
+   +--------+--------------+------------+-------+------+-----+-----+-----+----------+----------------+----
+```
 * Individual data points for a particular meter may be aggregated into consolidated statistics via the CLI statistics command:
-
-    ```
-    ceilometer statistics --meter cpu_util
-    ```
+```
+   $ ceilometer sample-list --meter cpu -q 'resource_id=INSTANCE_ID_1;timestamp>2013-10-01T09:00:00;timestamp<=2013-10-01T09:30:00'
+   +---------------+------+------------+---------------+------+---------------------+
+   | Resource ID   | Name | Type       | Volume        | Unit | Timestamp           |
+   +---------------+------+------------+---------------+------+---------------------+
+   | INSTANCE_ID_1 | cpu  | cumulative | 1.7234e+11    | ns   | 2013-10-01T09:08:28 |
+   | INSTANCE_ID_1 | cpu  | cumulative | 1.743e+11     | ns   | 2013-10-01T09:18:28 |
+   | INSTANCE_ID_1 | cpu  | cumulative | 1.7626e+11    | ns   | 2013-10-01T09:28:28 |
+   +---------------+------+------------+---------------+------+---------------------+
+```
 
 
 
