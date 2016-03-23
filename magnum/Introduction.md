@@ -54,10 +54,10 @@ In magnum you create *bays*. A bay is where your container orchestration softwar
 
 ![Screenshot of Heat Stack in Horizon](./photos/magnum_heat.png)
 
-## Installation
+## 3. Installation
 Magnum can be installed in DevStack by enabling the plugin in your `local.conf`. `enable_plugin magnum https://git.openstack.org/openstack/magnum` The full details can be found [here](http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#exercising-the-services-using-devstack) The [Cloud Init](./cloud.init) file in this directory can be used to initialize a cloud machine with DevStack and Magnum.
 
-## CLI
+## 4. CLI
 Magnum is used through the *magnum* Python client. To interact with bays (create pods, run containers, etc.) you use the magnum client, not the kubectl or docker-swarm clients. Here's a partial overview of the available commands.
 
 ```
@@ -109,13 +109,13 @@ help                Display help about this program or one of its
                     subcommands.
 ```
 
-### Creating a Kubernetes Bay
+### 4.1. Creating a Kubernetes Bay
 
-### Using Kubernetes Bay
+### 4.2. Using Kubernetes Bay
 
-## Code Review
+## 5. Code Review
 
-## Code Contribution
+## 6. Code Contribution
 ```
 magnum/
 |-- contrib
@@ -210,7 +210,7 @@ magnum/
 `-- tools
 ```
 
-## References
+## 7. References
 <https://wiki.openstack.org/wiki/Magnum>  
 <http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#exercising-the-services-using-devstack>  
 <http://docs.openstack.org/developer/devstack/guides/single-vm.html>  
