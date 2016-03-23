@@ -3,13 +3,22 @@
 ## Outline ##
 - 1) Introduction
 - 2) Architecture
-	- 2.1) Interactions with other OpenStack Services
-		- 2.1.1) Glance
-		- 2.1.2) Neutron
+	- 2.1) Nova REST API
 	- 2.2) Messaging
-	- 2.3) Filter Schedule
+	- 2.3) Filter Scheduler
 	- 2.4) Threading Model
 	- 2.5) Block Device Mapping
+	- 2.6) Compute
+	- 2.7) Conductor
+	- 2.8) SQL Database
+	- 2.9) Host Aggregates
+	- 2.10) Notifications
+	- 2.11) Virtual Machine States and Transitions
+	- 2.12) Internalization
+    - 2.13) Interactions with other OpenStack Services
+		- 2.13.1) Glance
+		- 2.13.2) Neutron
+		- 2.13.3) Keystone
 - 3) Installation
 	- 3.1) Installing Nova from DevStack Source
 	- 3.2) Installing Nova from Packages 
@@ -34,209 +43,9 @@ As the most distributed component in the OpenStack platform, Nova interacts heav
 
 ## 2. Architecture ##
 
-### 2.1.2 Nova Interaction with Neutron ###
+![Architecture Diagram](http://www.berezins.com/wp-content/uploads/6903OS_1_1.png)
 
-Neutron plays a huge role in ensuring that nova instances are able to communicate with each other from the users point of view. Many different instances can exist across multiple compute nodes, which will exist on different hardware, however they all need to behave as though they are on the same local network. When an instance is booted, it needs to communicate with Neutron's API to get its own IP address based on the virtual network that it is supposed to be a part of. 
-
-Nova can access the Neutron API and get information about which Networks, subnets, and ports a specific tenant has access to, which all need to be checked before a specific instance gets permission to use them.
-
-### 2.2 Messaging ###
-
-Advanced Message Queueing Protocol (AMQP) is a messaging protocol used by OpenStack allowing Nova components to communicate with each other. AMQP uses a broker, either RabbitMQ or Qpid, to allow these Nova components to send Remote Procedure Calls (RPC) using a publish/subscribe paradigm. 
-
-The architecture can be explained by the following picture: 
-
-![AMQP Architecture Image]
-(http://docs.openstack.org/developer/nova/_images/arch.png)
-
-Nova provides an adapter class which will marshal and unmarshal the messages from the RPC calls into function calls. 
-
-#### Nova RPC Mappings####
-Each Nova component will connect to a message broker node and will use the queue as either a Worker(Compute or Network) or an Invoker (API or Scheduler). Keep in mind that Workers and Invokers are just conceptual to aid in understanding, and do not actually exist as Nova objects. Invokers send messages in the queue system via rpc.call and rpc.cast, Workers receive messages from the queue system and reply to rpc.call operations.
-
-The following figure shows the message broker node and how it interacts with the different pieces. They are described below.
-
-![RPC broker node pic]
-(http://docs.openstack.org/developer/nova/_images/rabt.png)
-
-- Topic Publisher: object is instantiated and pushes a message to the queueing system after an rpc.call or an rpc.cast
-- Direct Consumer: object is instantiated to receive a response message from the queueing system after an rpc.call
-- Topic Consumer: object receives message from the queue and invokes the action defined by the Worker role. Each Worker has two Topic Consumers, one for rpc.cast and one for rpc.call operations.
-- Direct Publisher: instantiated to return the message required by the request/response operation after an rpc.call.
-- Topic Exchange: routing table that exists in the context of a virtual host, each message broker node has one topic exchange for every topic in Nova
-- Direct Exchange: routing table created during rpc.call operations, an instance is created for each rpc.call invocation
-- Queue Element: Messages are kept in the queue until a Topic or Direct Consumer connects to fetch it. Queues can be shared amongst Workers of the same type (Compute node, Network node, etc)
-
-#### RPC Calls and Casts####
-The diagram below shows the message flow during an rpc.call operation:
-
-A Topic Publisher is instantiated and sends the message request to the queueing system and a Direct Consumer is instantiated to waiat for the response. The exchange will dispatch the message based on the routing key and the Topic Consumer will fetch it, then pass it to a Worker for that task. When this task is complete a Direct publisher is allocated to send the response message to the queueing system. This message is dispatched by the exchange and fetched by a Direct Consumer based on the routing key, then passed to the Invoker.
-
-![RPC Call pic]
-(http://docs.openstack.org/developer/nova/_images/flow1.png)
-
-The diagram below shows the message flow during an rpc.cast operation:
-
-A Topic Publisher sends the message request into the queueing system, which is then dispatched by the exchange. It is fetched by the Topic Consumer based on the routing key and passed to the Worker for that task.
-
-![RPC Cast Pic]
-(http://docs.openstack.org/developer/nova/_images/flow2.png)
-
-### 2.3 Filter Scheduler ###
-
-The Filter Scheduler uses filtering and weighting to make informed decisions on where a new instance should be created on a Compute Node.
-
-![Threading Model]
-(http://docs.openstack.org/developer/nova/_images/filteringWorkflow1.png)
-
-The Filter Scheduler looks over all compute nodes and evaluates them against a set of filters. The filters will eliminate some of the hosts, and the resulting hosts will be weighted, which will sort them by suitability. The Scheduler will then choose the hosts for each instance based on the weights. It is possible that the Scheduler may not find any candidate for the next instance, in which case that instance will not be booted. If the default scheduling algorithm is insufficient for a users needs, that user can create their own scheduling algorithm. There are a lot of built in functions that can be used to define the filtering algorithm.
-
-The weighing process is defined by equations which can also be set by the user. Different properties, such as RAM usage, CPU usage, Disk usage, I/O usage, etc, can be assigned different values in order to use a custom sorting to choose which host is the most suitable for the new instance(s).
-
-![Weighing]
-(http://docs.openstack.org/developer/nova/_images/filteringWorkflow2.png)
-
-### 2.4 Threading Model ###
-
-All OpenStack services use green thread model of threading, implemented through using the Python eventlet and greenlet libraries. Green threads emulate real threading without relying on any native OS capabilities, they are managed completely in user space instead of kernel space, which allows them to work in environments that do not have native thread support. They use a cooperative model of threading, meaning context switches only occur when specific eventlet or greenlet library calls are made. It is important to keep in mind that there is only one operating system thread per service, so any call that blocks the main thread will block the entire process.
-
-### 2.5 Block Device Mapping ###
-
-In nova, each instance can have a variety of block devices available to it, depending on the deployment. Limitations can be set for certain users or tenants for each instance. Block device mapping is a way to organize and keep data about all the block devices an instance has.
-
-Block device mapping usually refers to one of two things. First, the API or CLI structure and syntax required to specify which block devices for an instance boot. Second, the internal data structure inside nova that is used for recording and keeping in a block device mapping table.
-
-There have been a variety of implementations for this that have all had their issues, however the most recent and currently used is Block Device Mapping v2.
-
-This new block device mapping is a list of dictionaries containing the following fields (in addition to the ones that were already there):
-
-- source_type - this can have one of the following values:
-  - image
-  - volume
-  - snapshot
-  - blank
-- dest_type - this can have one of the following values:
-  - local
-  - volume
-
-Combination of the above two fields would define what kind of block device the entry is referring to. The following combinations are supported. Nova will do validation to ensure the requested mapping is valid before accepting a boot request.
-
-- image -> local: this is only currently reserved for the entry referring to the Glance image that the instance is being booted with 
-- volume -> volume: Cinder volume to be attached to the instance, can be marked as a boot device.
-- snapshot -> volume: creates a volume from a Cinder volume snapshot and attach that volume to the instance, can be marked bootable.
-- image -> volume: Download a Glance image to a cinder volume and attach it to an instance, can also be marked as bootable
-- blank -> volume: Creates a blank Cinder volume and attaches it
-- blank -> local - Depending on the guest_format field, this will either mean an ephemeral blank disk on hypervisor local storage, or a swap disk
-
-
-
-
-**Notifications**
-
-Similarly to other OpenStack services Nova emits notifications to the message bus with the Notifier class provided by oslo.messaging. From the notification consumer point of view a notification consists of two parts: an envelope with a fixed structure defined by oslo.messaging and a payload defined by the service emitting the notification. 
-
-There are two types of notifications in Nova: legacy notifications which have an unversioned payload and newer notifications which have a versioned payload.
-
-The versioned notification concept is created to fix the shortcomings of the unversioned notifications. The envelope structure of the emitted notification is the same as in the unversioned notification case as it is provided by oslo.messaging. However the payload is not a free form dictionary but a serialized oslo versionedobject.
-
-**Compute**
-
-Compute manages communication with hypervisors and virtual machines.  You can create compute nodes that will receive requests from the controller node and virtual machine instances.  The compute service relies on a hypervisor to run virtual machine instances.  OpenStack can use a number of various hypervisors such as Docker, KVM or QEMU.
-
-The basics:  Compute will accept actions from the queue and then perform a series of system commands and carry them out while updating status in the database.
-
-While all services are designed to be horizontally scalable, you should have significantly more computes then anything else.
-
-**Conductor**
-
-In addition to its roles as a database proxy and object backporter the conductor service also serves as a centralized place to manage the execution of workflows which involve the scheduler. Rebuild, resize/migrate, and building an instance are managed here. This was done in order to have a better separation of responsibilities between what compute nodes should handle and what the scheduler should handle, and to clean up the path of execution. Conductor was chosen because in order to query the scheduler in a synchronous manner it needed to happen after the API had returned a response otherwise API response times would increase. And changing the scheduler call from asynchronous to synchronous helped to clean up the code.
-
-This new process means the scheduler only deals with scheduling, the compute only deals with building an instance, and the conductor manages the workflow. The code is now cleaner in the scheduler and computes.
-
-Aims to enable “No DB” compute
-
-- Remove direct DB access from compute service
-- Compute nodes are least trusted component
-- Direct DB access complicates upgrades
-
-Layer on top of the compute service
-
-- Abstracts all direct DB access away from compute nodes
-- Can be scaled horizontally, similar to nova-api or nova-scheduler
-- Should not be run on compute nodes (eliminates security benefit)
-
-**SQL Database**
-
-The Nova DB stores the current state of all objects in the compute cluster.  It can be done with any relational database - like MySQL or Postgre.  The Nova API talks to the database via SQLAlchemy which is a python Object Relational Mapper.
-
-**Host Aggregates**
-Host aggregates can be regarded as a mechanism to further partition an availability zone. Host aggregates provide a mechanism to allow administrators to assign key-value pairs to groups of machines. Each node can have multiple aggregates, each aggregate can have multiple key-value pairs, and the same key-value pair can be assigned to multiple aggregates. This information can be used in the scheduler to enable advanced scheduling, to set up xen hypervisor resources pools or to define logical groups for migration.
-
-****Availability Zones (AZs)****
-
-Availability Zones are the end-user visible logical abstraction for partitioning a cloud without knowing the physical infrastructure. The availability zone is actually a specific metadata information attached to an aggregate. Adding that specific metadata to an aggregate makes the aggregate visible from an end-user perspective and consequently allows to schedule upon a specific set of hosts (the ones belonging to the aggregate).
-
-That said, there are a few rules to know that diverge from an API perspective between aggregates and availability zones:
-
-* one host can be in multiple aggregates, but it can only be in one availability zone
-* by default a host is part of a default availability zone even if it doesn’t belong to an aggregate (the configuration option is named default_availability_zone)
-
-****Xen Pool Host Aggregates****
-
-Originally all aggregates were Xen resource pools, now an aggregate can be set up as a resource pool by giving the aggregate the correct key-value pair.
-You can use aggregates for XenServer resource pools when you have multiple compute nodes installed (only XenServer/XCP via xenapi driver is currently supported), and you want to leverage the capabilities of the underlying hypervisor resource pools.
-
-****Design****
-
-The OSAPI Admin API is extended to support the following operations:
-
-Aggregates
-
-- list aggregates: returns a list of all the host-aggregates (optionally filtered by availability zone)
-
-- create aggregate: creates an aggregate, takes a friendly name, etc. returns an id
-- show aggregate: shows the details of an aggregate (id, name, availability_zone, hosts and metadata)
-- update aggregate: updates the name and availability zone of an aggregate
-- set metadata: sets the metadata on an aggregate to the values supplied
-- delete aggregate: deletes an aggregate, it fails if the aggregate is not empty
-- add host: adds a host to the aggregate
-- remove host: removes a host from the aggregate
-
-Hosts
-
-- start host maintenance (or evacuate-host): disallow a host to serve API requests and migrate instances to other hosts of the aggregate
-- stop host maintenance: (or rebalance-host): put the host back into operational mode, migrating instances back onto that host
-
-
-###2.2) Virtual Machine States and Transitions###
-
-****Allowed State Transitions****
-
-![](http://docs.openstack.org/developer/nova/_images/graphviz-aa3b50f03fc95e5ea0896d5f2c606d809e3e2741.png)
-
-****Requirements for Commands****
-
-![](http://i195.photobucket.com/albums/z7/BrandonIzzy/reqCmds_zpsklfqiwvw.png)
-
-****VM states and Possible Commands****
-
-![](http://i195.photobucket.com/albums/z7/BrandonIzzy/statesAndCmds_zpsqigexi5x.png)
-
-****Create Instance States****
-
-The following diagram shows the sequence of VM states, task states, and power states when a new VM instance is created.
-
-![](http://docs.openstack.org/developer/nova/_images/create_vm_states.svg) 
-
-
-
-
-
-###2.5) Internalization###
-
-Nova uses the oslo.i18n library to support internationalization. The oslo.i18n library is built on top of gettext and provides functions that are used to enable user-facing strings such as log messages to appear in the appropriate language in different locales.
-
-###2.6) Nova REST API###
+###2.1 Nova REST API###
 
 This is the Nova component that receives HTTP requests, converts commands and communicates with other components via the oslo.messaging queue or HTTP.
 
@@ -722,14 +531,212 @@ Manages volumes and snapshots for use with the Compute API.
 - Show snapshot details (GET)
 - Delete snapshot (DELETE)
 
+### 2.2 Messaging ###
 
-### 2.1  Interactions with other OpenStack Services ###
+Advanced Message Queueing Protocol (AMQP) is a messaging protocol used by OpenStack allowing Nova components to communicate with each other. AMQP uses a broker, either RabbitMQ or Qpid, to allow these Nova components to send Remote Procedure Calls (RPC) using a publish/subscribe paradigm. 
 
-#### 2.1.1  Glance ####
+The architecture can be explained by the following picture: 
+
+![AMQP Architecture Image]
+(http://docs.openstack.org/developer/nova/_images/arch.png)
+
+Nova provides an adapter class which will marshal and unmarshal the messages from the RPC calls into function calls. 
+
+#### Nova RPC Mappings####
+Each Nova component will connect to a message broker node and will use the queue as either a Worker(Compute or Network) or an Invoker (API or Scheduler). Keep in mind that Workers and Invokers are just conceptual to aid in understanding, and do not actually exist as Nova objects. Invokers send messages in the queue system via rpc.call and rpc.cast, Workers receive messages from the queue system and reply to rpc.call operations.
+
+The following figure shows the message broker node and how it interacts with the different pieces. They are described below.
+
+![RPC broker node pic]
+(http://docs.openstack.org/developer/nova/_images/rabt.png)
+
+- Topic Publisher: object is instantiated and pushes a message to the queueing system after an rpc.call or an rpc.cast
+- Direct Consumer: object is instantiated to receive a response message from the queueing system after an rpc.call
+- Topic Consumer: object receives message from the queue and invokes the action defined by the Worker role. Each Worker has two Topic Consumers, one for rpc.cast and one for rpc.call operations.
+- Direct Publisher: instantiated to return the message required by the request/response operation after an rpc.call.
+- Topic Exchange: routing table that exists in the context of a virtual host, each message broker node has one topic exchange for every topic in Nova
+- Direct Exchange: routing table created during rpc.call operations, an instance is created for each rpc.call invocation
+- Queue Element: Messages are kept in the queue until a Topic or Direct Consumer connects to fetch it. Queues can be shared amongst Workers of the same type (Compute node, Network node, etc)
+
+#### RPC Calls and Casts####
+The diagram below shows the message flow during an rpc.call operation:
+
+A Topic Publisher is instantiated and sends the message request to the queueing system and a Direct Consumer is instantiated to waiat for the response. The exchange will dispatch the message based on the routing key and the Topic Consumer will fetch it, then pass it to a Worker for that task. When this task is complete a Direct publisher is allocated to send the response message to the queueing system. This message is dispatched by the exchange and fetched by a Direct Consumer based on the routing key, then passed to the Invoker.
+
+![RPC Call pic]
+(http://docs.openstack.org/developer/nova/_images/flow1.png)
+
+The diagram below shows the message flow during an rpc.cast operation:
+
+A Topic Publisher sends the message request into the queueing system, which is then dispatched by the exchange. It is fetched by the Topic Consumer based on the routing key and passed to the Worker for that task.
+
+![RPC Cast Pic]
+(http://docs.openstack.org/developer/nova/_images/flow2.png)
+
+### 2.3 Filter Scheduler ###
+
+The Filter Scheduler uses filtering and weighting to make informed decisions on where a new instance should be created on a Compute Node.
+
+![Threading Model]
+(http://docs.openstack.org/developer/nova/_images/filteringWorkflow1.png)
+
+The Filter Scheduler looks over all compute nodes and evaluates them against a set of filters. The filters will eliminate some of the hosts, and the resulting hosts will be weighted, which will sort them by suitability. The Scheduler will then choose the hosts for each instance based on the weights. It is possible that the Scheduler may not find any candidate for the next instance, in which case that instance will not be booted. If the default scheduling algorithm is insufficient for a users needs, that user can create their own scheduling algorithm. There are a lot of built in functions that can be used to define the filtering algorithm.
+
+The weighing process is defined by equations which can also be set by the user. Different properties, such as RAM usage, CPU usage, Disk usage, I/O usage, etc, can be assigned different values in order to use a custom sorting to choose which host is the most suitable for the new instance(s).
+
+![Weighing]
+(http://docs.openstack.org/developer/nova/_images/filteringWorkflow2.png)
+
+### 2.4 Threading Model ###
+
+All OpenStack services use green thread model of threading, implemented through using the Python eventlet and greenlet libraries. Green threads emulate real threading without relying on any native OS capabilities, they are managed completely in user space instead of kernel space, which allows them to work in environments that do not have native thread support. They use a cooperative model of threading, meaning context switches only occur when specific eventlet or greenlet library calls are made. It is important to keep in mind that there is only one operating system thread per service, so any call that blocks the main thread will block the entire process.
+
+### 2.5 Block Device Mapping ###
+
+In nova, each instance can have a variety of block devices available to it, depending on the deployment. Limitations can be set for certain users or tenants for each instance. Block device mapping is a way to organize and keep data about all the block devices an instance has.
+
+Block device mapping usually refers to one of two things. First, the API or CLI structure and syntax required to specify which block devices for an instance boot. Second, the internal data structure inside nova that is used for recording and keeping in a block device mapping table.
+
+There have been a variety of implementations for this that have all had their issues, however the most recent and currently used is Block Device Mapping v2.
+
+This new block device mapping is a list of dictionaries containing the following fields (in addition to the ones that were already there):
+
+- source_type - this can have one of the following values:
+  - image
+  - volume
+  - snapshot
+  - blank
+- dest_type - this can have one of the following values:
+  - local
+  - volume
+
+Combination of the above two fields would define what kind of block device the entry is referring to. The following combinations are supported. Nova will do validation to ensure the requested mapping is valid before accepting a boot request.
+
+- image -> local: this is only currently reserved for the entry referring to the Glance image that the instance is being booted with 
+- volume -> volume: Cinder volume to be attached to the instance, can be marked as a boot device.
+- snapshot -> volume: creates a volume from a Cinder volume snapshot and attach that volume to the instance, can be marked bootable.
+- image -> volume: Download a Glance image to a cinder volume and attach it to an instance, can also be marked as bootable
+- blank -> volume: Creates a blank Cinder volume and attaches it
+- blank -> local - Depending on the guest_format field, this will either mean an ephemeral blank disk on hypervisor local storage, or a swap disk
+
+### 2.6 Compute ###
+
+Compute manages communication with hypervisors and virtual machines.  You can create compute nodes that will receive requests from the controller node and virtual machine instances.  The compute service relies on a hypervisor to run virtual machine instances.  OpenStack can use a number of various hypervisors such as Docker, KVM or QEMU.
+
+The basics:  Compute will accept actions from the queue and then perform a series of system commands and carry them out while updating status in the database.
+
+While all services are designed to be horizontally scalable, you should have significantly more computes then anything else.
+
+### 2.7 Conductor###
+
+In addition to its roles as a database proxy and object backporter the conductor service also serves as a centralized place to manage the execution of workflows which involve the scheduler. Rebuild, resize/migrate, and building an instance are managed here. This was done in order to have a better separation of responsibilities between what compute nodes should handle and what the scheduler should handle, and to clean up the path of execution. Conductor was chosen because in order to query the scheduler in a synchronous manner it needed to happen after the API had returned a response otherwise API response times would increase. And changing the scheduler call from asynchronous to synchronous helped to clean up the code.
+
+This new process means the scheduler only deals with scheduling, the compute only deals with building an instance, and the conductor manages the workflow. The code is now cleaner in the scheduler and computes.
+
+Aims to enable “No DB” compute
+
+- Remove direct DB access from compute service
+- Compute nodes are least trusted component
+- Direct DB access complicates upgrades
+
+Layer on top of the compute service
+
+- Abstracts all direct DB access away from compute nodes
+- Can be scaled horizontally, similar to nova-api or nova-scheduler
+- Should not be run on compute nodes (eliminates security benefit)
+
+### 2.8 SQL Database###
+
+The Nova DB stores the current state of all objects in the compute cluster.  It can be done with any relational database - like MySQL or Postgre.  The Nova API talks to the database via SQLAlchemy which is a python Object Relational Mapper.
+
+### 2.9 Host Aggregates###
+Host aggregates can be regarded as a mechanism to further partition an availability zone. Host aggregates provide a mechanism to allow administrators to assign key-value pairs to groups of machines. Each node can have multiple aggregates, each aggregate can have multiple key-value pairs, and the same key-value pair can be assigned to multiple aggregates. This information can be used in the scheduler to enable advanced scheduling, to set up xen hypervisor resources pools or to define logical groups for migration.
+
+****Availability Zones (AZs)****
+
+Availability Zones are the end-user visible logical abstraction for partitioning a cloud without knowing the physical infrastructure. The availability zone is actually a specific metadata information attached to an aggregate. Adding that specific metadata to an aggregate makes the aggregate visible from an end-user perspective and consequently allows to schedule upon a specific set of hosts (the ones belonging to the aggregate).
+
+That said, there are a few rules to know that diverge from an API perspective between aggregates and availability zones:
+
+* one host can be in multiple aggregates, but it can only be in one availability zone
+* by default a host is part of a default availability zone even if it doesn’t belong to an aggregate (the configuration option is named default_availability_zone)
+
+****Xen Pool Host Aggregates****
+
+Originally all aggregates were Xen resource pools, now an aggregate can be set up as a resource pool by giving the aggregate the correct key-value pair.
+You can use aggregates for XenServer resource pools when you have multiple compute nodes installed (only XenServer/XCP via xenapi driver is currently supported), and you want to leverage the capabilities of the underlying hypervisor resource pools.
+
+****Design****
+
+The OSAPI Admin API is extended to support the following operations:
+
+Aggregates
+
+- list aggregates: returns a list of all the host-aggregates (optionally filtered by availability zone)
+
+- create aggregate: creates an aggregate, takes a friendly name, etc. returns an id
+- show aggregate: shows the details of an aggregate (id, name, availability_zone, hosts and metadata)
+- update aggregate: updates the name and availability zone of an aggregate
+- set metadata: sets the metadata on an aggregate to the values supplied
+- delete aggregate: deletes an aggregate, it fails if the aggregate is not empty
+- add host: adds a host to the aggregate
+- remove host: removes a host from the aggregate
+
+Hosts
+
+- start host maintenance (or evacuate-host): disallow a host to serve API requests and migrate instances to other hosts of the aggregate
+- stop host maintenance: (or rebalance-host): put the host back into operational mode, migrating instances back onto that host
+
+###2.10 Notifications###
+
+Similarly to other OpenStack services Nova emits notifications to the message bus with the Notifier class provided by oslo.messaging. From the notification consumer point of view a notification consists of two parts: an envelope with a fixed structure defined by oslo.messaging and a payload defined by the service emitting the notification. 
+
+There are two types of notifications in Nova: legacy notifications which have an unversioned payload and newer notifications which have a versioned payload.
+
+The versioned notification concept is created to fix the shortcomings of the unversioned notifications. The envelope structure of the emitted notification is the same as in the unversioned notification case as it is provided by oslo.messaging. However the payload is not a free form dictionary but a serialized oslo versionedobject.
+
+
+###2.11 Virtual Machine States and Transitions###
+
+****Allowed State Transitions****
+
+![](http://docs.openstack.org/developer/nova/_images/graphviz-aa3b50f03fc95e5ea0896d5f2c606d809e3e2741.png)
+
+****Requirements for Commands****
+
+![](http://i195.photobucket.com/albums/z7/BrandonIzzy/reqCmds_zpsklfqiwvw.png)
+
+****VM states and Possible Commands****
+
+![](http://i195.photobucket.com/albums/z7/BrandonIzzy/statesAndCmds_zpsqigexi5x.png)
+
+****Create Instance States****
+
+The following diagram shows the sequence of VM states, task states, and power states when a new VM instance is created.
+
+![](http://docs.openstack.org/developer/nova/_images/create_vm_states.svg) 
+
+
+
+
+
+###2.12 Internalization###
+
+Nova uses the oslo.i18n library to support internationalization. The oslo.i18n library is built on top of gettext and provides functions that are used to enable user-facing strings such as log messages to appear in the appropriate language in different locales.
+
+### 2.13  Interactions with other OpenStack Services ###
+
+#### 2.13.1  Glance ####
 
 Nova's most important interactions are with the Glance service.  Glance is responsible for the management and retrieval of virtual machine images.  While Glance itself does not store the images, it is a necessary layer of abstraction which provides all of the necessary data in order for Nova to start the virtual machine.  Glance allows users to create and list available images, which are fed into Nova to be executed.  When a user creates a snapshot of their virtual machine, they have actually created a new image.  Glance will add the new image to its database and storage back end.
 
-#### 2.1.2  Keystone ####
+#### 2.13.2  Neutron ####
+
+Neutron plays a huge role in ensuring that nova instances are able to communicate with each other from the users point of view. Many different instances can exist across multiple compute nodes, which will exist on different hardware, however they all need to behave as though they are on the same local network. When an instance is booted, it needs to communicate with Neutron's API to get its own IP address based on the virtual network that it is supposed to be a part of. 
+
+Nova can access the Neutron API and get information about which Networks, subnets, and ports a specific tenant has access to, which all need to be checked before a specific instance gets permission to use them.
+
+#### 2.13.3  Keystone ####
 
 Nova interacts with Keystone to perform authentication.  For instance, if a user wanted to create a new instance, Nova would need to send a request to Keystone with the user's password and username.  Keystone would then reply to Nova with a Token assuming the credentials were valid.  Nova will then use this token when it performs tasks by sending it to Keystone for validation.  In our example, if the token is valid, Nova can continue with making the  user's instance.  Tokens are valid for one hour by default.
 
@@ -1098,19 +1105,21 @@ Reconstructs the image using a new image while maintaining its other properties
 
 ## 8. References ##
 
+[Architecture Diagram](http://www.berezins.com/openstack-architecture-and-services/ "Architecture Diagram")
+
 [Introduction - Webopedia](http://www.webopedia.com/TERM/O/openstack-nova.html)
 
 [Introduction - OpenStack](http://docs.openstack.org/developer/nova/project_scope.html)
 
 [Introduction - Jenkov](http://tutorials.jenkov.com/jquery/deferred-objects.html)
 
-[http://docs.openstack.org/developer/devstack/](http://docs.openstack.org/developer/devstack/)
+[Installation via DevStack](http://docs.openstack.org/developer/devstack/)
 
-[http://docs.openstack.org/user-guide/cli_cheat_sheet.html](http://docs.openstack.org/user-guide/cli_cheat_sheet.html)
+[CLI](http://docs.openstack.org/user-guide/cli_cheat_sheet.html)
 
-[http://docs.openstack.org/liberty/install-guide-ubuntu/](http://docs.openstack.org/liberty/install-guide-ubuntu/)
+[Installation from packages](http://docs.openstack.org/liberty/install-guide-ubuntu/)
 
-[http://www.ibm.com/developerworks/cloud/library/cl-openstack-nova-glance/](http://www.ibm.com/developerworks/cloud/library/cl-openstack-nova-glance/)
+[Interactions with Glance](http://www.ibm.com/developerworks/cloud/library/cl-openstack-nova-glance/)
 
 [Compute Node](http://blog.flux7.com/blogs/openstack/tutorial-what-is-nova-and-how-to-install-use-it-openstack)
 
