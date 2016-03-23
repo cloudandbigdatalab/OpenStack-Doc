@@ -13,6 +13,7 @@ To accomplish this Magnum uses the standard OpenStack projects (Nova, Neutron, G
 Magnum provides an API designed to manage app containers. It differs from Nova, Docker, Swarm, or Kubernetes but leverages all as components. It also differs from Nova-Docker or using the Docker resource in Heat directly. Magnum makes Docker containers first-class citizens on OpenStack.
 
 ### 1.2 Terms
+
 #### General
 
 **Container:** An instance of OS-level virtualization with an isolated user-space. Different from a virtual machine as it uses OS resources including the kernel and file system; not as isolated or secure. Different types of Linux containers exist. Magnum uses Docker containers. [\[2\]][2]
