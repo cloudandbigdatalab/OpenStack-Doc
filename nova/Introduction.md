@@ -3,6 +3,8 @@
 ## Outline ##
 - 1) Introduction
 - 2) Architecture
+	- 2.1) Interactions with other OpenStack Services
+		- 2.1) Glance
 - 3) Installation
 	- 3.1) Installing Nova from DevStack Source
 	- 3.2) Installing Nova from Packages 
@@ -20,9 +22,6 @@ What is Nova?
 
 ## 2. Architecture ##
 
-Explain overall picture of Nova
-
-
 **Messaging**
 
 **Scheduler**
@@ -34,7 +33,11 @@ Explain overall picture of Nova
 **SQL Database**
 
 
-Explain how Nova interacts with other services (Neutron and Keystone)
+### 2.1  Interactions with other OpenStack Services ###
+
+#### 2.1.1  Glance ####
+
+Nova's most important interactions are with the Glance service.  Glance is responsible for the management and retrieval of virtual machine images.  While Glance itself does not store the images, it is a necessary layer of abstraction which provides all of the necessary data in order for Nova to start the virtual machine.  Glance allows users to create and list available images, which are fed into Nova to be executed.  When a user creates a snapshot of their virtual machine, they have actually created a new image.  Glance will add the new image to its database and storage back end.
 
 ## 3. Installation ##
 
@@ -398,4 +401,6 @@ Reconstructs the image using a new image while maintaining its other properties
 [http://docs.openstack.org/user-guide/cli_cheat_sheet.html](http://docs.openstack.org/user-guide/cli_cheat_sheet.html)
 
 [http://docs.openstack.org/liberty/install-guide-ubuntu/](http://docs.openstack.org/liberty/install-guide-ubuntu/)
+
+[http://www.ibm.com/developerworks/cloud/library/cl-openstack-nova-glance/](http://www.ibm.com/developerworks/cloud/library/cl-openstack-nova-glance/)
 
