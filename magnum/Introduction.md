@@ -7,7 +7,7 @@ Shawn Aten, Annie Lezil, Mohan Muppidi
 
 Magnum automates the setup of Kubernetes, Swarm, or Mesos clusters on OpenStack deployments making setup faster and more consistent. The use of containers in the cloud allows for denser utilization of VM and hardware resources.
 
-In magnum you create *bays*. A bay is where your container orchestrations software (Kubernetes, Swarm, Mesos) runs. Bays can contain multiple nodes. A bay is accessible to a single tenant. Bays with different engines can be run side by side so you're not locked-in to a single platform.
+In magnum you create *bays*. A bay is where your container orchestration software (Kubernetes, Swarm, Mesos) runs. Bays can contain multiple nodes. A bay is accessible to a single tenant. Bays with different engines can be run side by side so you're not locked-in to a single platform.
 
 ## Architecture
 ![Magnum Architecture Diagram](./photos/magnum_architecture.png)
