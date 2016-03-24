@@ -118,7 +118,62 @@ Create a keypair for use with the baymodel:
   test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
   nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
   ```
-  
+Create a baymodel. This is similar in nature to a flavor and describes to magnum how to construct the bay. The coe (Container Orchestration Engine) and keypair need to be specified for the baymodel:
+  ```
+  magnum baymodel-create --name k8sbaymodel \
+                       --image-id fedora-21-atomic-5 \
+                       --keypair-id testkey \
+                       --external-network-id public \
+                       --dns-nameserver 8.8.8.8 \
+                       --flavor-id m1.small \
+                       --docker-volume-size 5 \
+                       --network-driver flannel \
+                       --coe kubernetes
+  ```
+Create a bay. Use the baymodel name as a template for bay creation. This bay will result in one master kubernetes node and one minion node:
+  ```
+  magnum bay-create --name k8sbay --baymodel k8sbaymodel --node-count 1
+  ```
+Bays will have an initial status of CREATE_IN_PROGRESS. Magnum will update the status to CREATE_COMPLETE when it is done creating the bay. Do not create containers, pods, services, or replication controllers before magnum finishes creating the bay. They will likely not be created, and may cause magnum to become confused.
+
+The existing bays can be listed as follows:
+  ```
+  magnum bay-list
+
+  +--------------------------------------+---------+------------+-----------------+
+  | uuid                                 | name    | node_count | status          |
+  +--------------------------------------+---------+------------+-----------------+
+  | 9dccb1e6-02dc-4e2b-b897-10656c5339ce | k8sbay  | 1          | CREATE_COMPLETE |
+  +--------------------------------------+---------+------------+-----------------+
+  ```
+More detailed information for a given bay is obtained via:
+  ```
+  magnum bay-show k8sbay
+  ```
+After a bay is created, you can dynamically add/remove node(s) to/from the bay by updating the node_count attribute. For example, to add one more node:
+  ```
+  magnum bay-update k8sbay replace node_count=2
+  ```
+Bays in the process of updating will have a status of UPDATE_IN_PROGRESS. Magnum will update the status to UPDATE_COMPLETE when it is done updating the bay.
+
+NOTE: Reducing node_count will remove all the existing pods on the nodes that are deleted. If you choose to reduce the node_count, magnum will first try to remove empty nodes with no pods running on them. If you reduce node_count by more than the number of empty nodes, magnum must remove nodes that have running pods on them. This action will delete those pods. We strongly recommend using a replication controller before reducing the node_count so any removed pods can be automatically recovered on your remaining nodes.
+
+Heat can be used to see detailed information on the status of a stack or specific bay:
+
+To check the list of all bay stacks:
+  ```
+  heat stack-list
+  ```
+To check an individual bay’s stack:
+  ```
+  heat stack-show <stack-name or stack_id>
+  ```
+Monitoring bay status in detail (e.g., creating, updating):
+  ```
+  BAY_HEAT_NAME=$(heat stack-list | awk "/\sk8sbay-/{print \$4}")
+  echo ${BAY_HEAT_NAME}
+  heat resource-list ${BAY_HEAT_NAME}
+  ```
 ### 4.2. Using Kubernetes Bay
 
 ## 5. Code Review
