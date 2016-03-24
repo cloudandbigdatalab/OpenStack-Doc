@@ -1,0 +1,17 @@
+# Project Roadmap
+
+## For Wednesday Meetings
+- 3-30-16:
+  - focused on installation section
+  - polish up sections from last week
+  - need to go through and document install process for 3 methods
+  - DevStack (Shawn)
+    - (NOTE: Running devstack within a virtual machine with magnum enabled is not recommended at this time.)
+  - Service by Service (Shawn, Annie)
+    - https://openstack.nimeyo.com/62358/openstack-operators-how-to-install-magnum?start=10#a_list_title
+    - both going to chip away at this, discuss progress, post links in here
+  - OpenStack Ansible (TBA / TBD)
+    - this relies on how far we get with a manual "production" install
+  - we're meeting Tuesday's and Thursday's from 2-3 PM every week
+  - let's meet next Monday from 2-3 just next week
+  - make sure to make talking points / informal script when we meet on Tuesday for the presentation
