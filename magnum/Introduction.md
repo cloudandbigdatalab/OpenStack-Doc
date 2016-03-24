@@ -22,6 +22,8 @@ Magnum provides an API designed to manage app containers. It differs from Nova, 
 
 **Kubernetes and Swarm:** Orchestration tools for the creation and management of clusters of nodes running Docker Engine. Swarm is developed by Docker and Kubernetes by Google.
 
+**COE**: Container Orchestration Engine (Kubernetes, Swarm)
+
 #### 1.2.2. Specific to Magnum
 
 **Bay:** A collection of node objects where work is scheduled
@@ -54,7 +56,14 @@ Heat is an orchestration tool that allows for automating usage of the other Open
 *Screenshot of Kubernetes Heat stack in Horizon.*
 
 ### 2.2. Detail of Communication Flow
-Clients communicate requests to the magnum-api. The magnum-api sends all requests to magnum-conductor. For example, a request to create a bay will cause magnum-api to communicate with magnum-conductor which then communicates with Heat to create and setup the resources. Then magnum-conductor will communicate with Kubernetes, Swarm, or Docker after setup. For example, if a request comes in to create a Kuberentes pod, magnum-api will communicate with magnum-conductor to send those request to the Kubernetes engine which would then commicate with the Docker engine.
+Clients communicate requests to the magnum-api. The magnum-api then communicates requests to the magnum-conductor. The magnum-conductor interacts with Heat, Docker, and the COE.
+
+For example a request to create a bay will hit the magnum-api first, which then communicates (via AMQP) with the magnum-conductor, which then uses a specified Heat Template and communicates with Heat (via API) to create the bay resource.
+
+All subsequent requests to this bay (say to create a pod) will again pass from the magnum-api to the magnum-conductor and then to Docker or the COE.
+
+![Diagram of Magnum Component Communication](./photos/architecture_comm_flow.png)
+*Flow of communication through magnum components.*
 
 ## 3. Installation
 Magnum can be installed in DevStack by enabling the plugin in your `local.conf`. `enable_plugin magnum https://git.openstack.org/openstack/magnum` The full details can be found [here](http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#exercising-the-services-using-devstack) The [Cloud Init](./cloud.init) file in this directory can be used to initialize a cloud machine with DevStack and Magnum.
