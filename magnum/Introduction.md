@@ -212,7 +212,7 @@ magnum/
 `-- tools
 ```
 
-## 7. General References
+## 7. References
 <https://wiki.openstack.org/wiki/Magnum>    
 <http://docs.openstack.org/developer/magnum/dev/quickstart.html#building-a-kubernetes-bay-based-on-fedora-atomic>
 <http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#using-kubernetes-bay>
