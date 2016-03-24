@@ -113,6 +113,12 @@ help                Display help about this program or one of its
 
 ### 4.1. Creating a Kubernetes Bay
 
+Create a keypair for use with the baymodel:
+  ```
+  test -f ~/.ssh/id_rsa.pub || ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+  nova keypair-add --pub-key ~/.ssh/id_rsa.pub testkey
+  ```
+  
 ### 4.2. Using Kubernetes Bay
 
 ## 5. Code Review
