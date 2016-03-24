@@ -14,7 +14,7 @@ Magnum provides an API designed to manage app containers. It differs from Nova, 
 
 ###1.2. Terms###
 
-#### General
+####1.2.1. General
 
 **Container:** An instance of OS-level virtualization with an isolated user-space. Different from a virtual machine as it uses OS resources including the kernel and file system; not as isolated or secure. Different types of Linux containers exist. Magnum uses Docker containers. [\[2\]][2]
 
@@ -22,13 +22,13 @@ Magnum provides an API designed to manage app containers. It differs from Nova, 
 
 **Kubernetes and Swarm:** Orchestration tools for the creation and management of clusters of nodes running Docker Engine. Swarm is developed by Docker and Kubernetes by Google.
 
-#### Specific to Magnum [\[4\]][4]
+####1.2.2. Specific to Magnum [\[4\]][4]
 
 **Bay:** A collection of node objects where work is scheduled
 
 **Bay Model:** An object stores template information about the bay which is used to create new bays consistently
 
-#### Specific to Kubernetes [\[4\]][4]
+####1.2.3. Specific to Kubernetes [\[4\]][4]
 
 **Pod:** A collection of containers running on one physical or virtual machine
 
