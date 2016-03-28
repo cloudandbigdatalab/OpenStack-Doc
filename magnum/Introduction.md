@@ -52,8 +52,8 @@ Magnum utilizes the typical OpenStack services: Nova, Neutron, Glance, Cinder an
 
 Heat is an orchestration tool that allows for automating usage of the other OpenStack services. Magnum does not reinvent the wheel with orchestration, it adds another layer on top of Heat to further automate the creation of resources for container usage.
 
-![Screenshot of Heat Stack in Horizon](./photos/magnum_heat.png)
-*Screenshot of Kubernetes Heat stack in Horizon.*
+![Screenshot of Heat Stack in Horizon](./photos/bay_heat_stack.png)
+*Screenshot of Bay Heat stack in Horizon.*
 
 ### 2.2. Detail of Communication Flow
 Clients communicate requests to the magnum-api. The magnum-api then communicates requests to the magnum-conductor. The magnum-conductor interacts with Heat, Docker, and the COE.
@@ -66,9 +66,7 @@ All subsequent requests to this bay (say to create a pod) will again pass from t
 *Flow of communication through magnum components.*
 
 ## 3. Installation
-*Assuming Ubuntu 14.04*
-
-**Note:** Running Magnum on DevStack in a VM is not recommended at this time.
+**Note:** Assuming Ubuntu 14.04 and running Magnum on DevStack in a VM is not recommended at this time.
 
 ### 3.1 Setup Dev Environment
 
@@ -79,7 +77,7 @@ adduser stack
 
 Since this user will be making many changes to your system, it will need to have sudo privileges:
 ```
-apt-get install sudo -y || yum install -y sudo
+apt-get install sudo -y
 echo "stack ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 ```
 
