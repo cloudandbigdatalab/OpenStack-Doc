@@ -157,7 +157,7 @@ enable_plugin barbican https://git.openstack.org/openstack/barbican
 VOLUME_BACKING_FILE_SIZE=20G
 END
 ```
-*NOTE:* Update PUBLIC_INTERFACE as appropriate for your system.
+**NOTE:** Update PUBLIC_INTERFACE as appropriate for your system.
 
 Optionally, you can enable ceilometer in devstack. If ceilometer is enabled, magnum will periodically send metrics to ceilometer:
 ```
@@ -165,16 +165,18 @@ cat >> /opt/stack/devstack/local.conf << END
 enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer
 END
 ```
-More devstack configuration information can be found at <http://docs.openstack.org/developer/devstack/configuration.html>
+More devstack configuration information can be found at 
+<http://docs.openstack.org/developer/devstack/configuration.html>
 
-More neutron configuration information can be found at <http://docs.openstack.org/developer/devstack/guides/neutron.html>
+More neutron configuration information can be found at 
+<http://docs.openstack.org/developer/devstack/guides/neutron.html>
 
 Run devstack:
 ```
 cd /opt/stack/devstack
 ./stack.sh
 ```
-*NOTE:* This will take a little extra time when the Fedora Atomic micro-OS image is downloaded for the first time.
+**NOTE:** This will take a little extra time when the Fedora Atomic micro-OS image is downloaded for the first time.
 
 At this point, two magnum process (magnum-api and magnum-conductor) will be running on devstack screens. If you make some code changes and want to test their effects, just stop and restart magnum-api and/or magnum-conductor.
 
