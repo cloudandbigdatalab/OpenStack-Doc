@@ -70,6 +70,57 @@ All subsequent requests to this bay (say to create a pod) will again pass from t
 
 ### 3.1 Setup Dev Environment
 
+Install OS prerequisites, pip, and common pip prerequisites:
+```
+sudo apt-get update
+sudo apt-get install -y python-dev libssl-dev libxml2-dev \
+                        libmysqlclient-dev libxslt-dev libpq-dev git \
+                        libffi-dev gettext build-essential
+                        
+curl -s https://bootstrap.pypa.io/get-pip.py | sudo python
+
+sudo pip install virtualenv flake8 tox testrepository git-review
+```
+
+You may need to explicitly upgrade virtualenv to prevent tox errors:
+```
+sudo pip install -U virtualenv
+```
+
+Pull Magnum source code:
+```
+cd ~
+git clone https://git.openstack.org/openstack/magnum
+cd magnum
+```
+
+To run Magnum's entire test suite (optional, takes time, not required at install):
+```
+tox
+```
+
+To run a specific test, use a positional argument for the unit tests:
+```
+# run a specific test for Python 2.7
+tox -epy27 -- test_conductor
+```
+
+You may pass options to the test programs using positional arguments:
+```
+# run all the Python 2.7 unit tests (in parallel!)
+tox -epy27 -- --parallel
+```
+
+To run only the pep8/flake8 syntax and style checks:
+```
+tox -epep8
+```
+
+To run unit test coverage and check percentage of code covered:
+```
+tox -e cover
+```
+
 ### 3.2 Devstack
 
 ## 4. CLI
