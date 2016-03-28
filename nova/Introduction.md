@@ -708,7 +708,7 @@ The versioned notification concept is created to fix the shortcomings of the unv
 
 The following diagram shows the sequence of VM states, task states, and power states when a new VM instance is created.
 
-![Create VM States](./resources/Architecture/Create_VM_States.svg) 
+![Create VM States](./resources/Architecture/Create_VM_States.png) 
 
 
 
