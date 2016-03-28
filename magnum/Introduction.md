@@ -66,9 +66,27 @@ All subsequent requests to this bay (say to create a pod) will again pass from t
 *Flow of communication through magnum components.*
 
 ## 3. Installation
-**Assuming Ubuntu 14.04**
+*Assuming Ubuntu 14.04*
+
+**Note:** Running Magnum on DevStack in a VM is not recommended at this time.
 
 ### 3.1 Setup Dev Environment
+
+Add a *stack* user. Don't run services as root.
+```
+adduser stack
+```
+
+Since this user will be making many changes to your system, it will need to have sudo privileges:
+```
+apt-get install sudo -y || yum install -y sudo
+echo "stack ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+```
+
+From here on you should use the user you created. Logout and login as that user or run:
+```
+su - stack
+```
 
 Install OS prerequisites, pip, and common pip prerequisites:
 ```
@@ -85,22 +103,6 @@ sudo pip install virtualenv flake8 tox testrepository git-review
 You may need to explicitly upgrade virtualenv to prevent tox errors:
 ```
 sudo pip install -U virtualenv
-```
-
-Add a *stack* user. Don't run services as root.
-```
-adduser stack
-```
-
-Since this user will be making many changes to your system, it will need to have sudo privileges:
-```
-apt-get install sudo -y || yum install -y sudo
-echo "stack ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-```
-
-From here on you should use the user you created. Logout and login as that user or run:
-```
-su - stack
 ```
 
 Pull Magnum source code:
