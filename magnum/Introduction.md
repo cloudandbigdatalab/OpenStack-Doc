@@ -66,7 +66,11 @@ All subsequent requests to this bay (say to create a pod) will again pass from t
 *Flow of communication through magnum components.*
 
 ## 3. Installation
-Magnum can be installed in DevStack by enabling the plugin in your `local.conf`. `enable_plugin magnum https://git.openstack.org/openstack/magnum` The full details can be found [here](http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#exercising-the-services-using-devstack) The [Cloud Init](./cloud.init) file in this directory can be used to initialize a cloud machine with DevStack and Magnum.
+**Assuming Ubuntu 14.04**
+
+### 3.1 Setup Dev Environment
+
+### 3.2 Devstack
 
 ## 4. CLI
 Magnum is used through the *magnum* Python client. To interact with bays (create pods, run containers, etc.) you use the magnum client, not the kubectl or docker-swarm clients. Here's a partial overview of the available commands.
@@ -413,3 +417,4 @@ magnum/
 <https://en.wikipedia.org/wiki/Operating-system-level_virtualization>
 <https://en.wikipedia.org/wiki/Docker_(software)>
 <http://docs.openstack.org/developer/magnum/#architecture>
+<http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#setup-dev-environment>
