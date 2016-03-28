@@ -576,5 +576,6 @@ magnum/
 <http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#using-kubernetes-bay>
 <https://en.wikipedia.org/wiki/Operating-system-level_virtualization>
 <https://en.wikipedia.org/wiki/Docker_(software)>
-<http://docs.openstack.org/developer/magnum/#architecture>
-<http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#setup-dev-environment>
+<http://docs.openstack.org/developer/magnum/#architecture>  
+<http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#setup-dev-environment>  
+<http://docs.openstack.org/developer/devstack/guides/single-machine.html>
