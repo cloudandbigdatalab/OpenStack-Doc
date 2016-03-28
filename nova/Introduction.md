@@ -43,7 +43,7 @@ As the most distributed component in the OpenStack platform, Nova interacts heav
 
 ## 2. Architecture ##
 
-![Architecture Diagram](http://www.berezins.com/wp-content/uploads/6903OS_1_1.png)
+![Architecture Diagram](./resources/Architecture/Nova_Architecture.png)
 
 ###2.1 Nova REST API###
 
@@ -537,8 +537,7 @@ Advanced Message Queueing Protocol (AMQP) is a messaging protocol used by OpenSt
 
 The architecture can be explained by the following picture: 
 
-![AMQP Architecture Image]
-(http://docs.openstack.org/developer/nova/_images/arch.png)
+![AMQP Architecture Image](./resources/Architecture/AMQP_Architecture_Image.png)
 
 Nova provides an adapter class which will marshal and unmarshal the messages from the RPC calls into function calls. 
 
@@ -547,8 +546,7 @@ Each Nova component will connect to a message broker node and will use the queue
 
 The following figure shows the message broker node and how it interacts with the different pieces. They are described below.
 
-![RPC broker node pic]
-(http://docs.openstack.org/developer/nova/_images/rabt.png)
+![RPC broker node pic](./resources/Architecture/RPC_broker_node_pic.png)
 
 - Topic Publisher: object is instantiated and pushes a message to the queueing system after an rpc.call or an rpc.cast
 - Direct Consumer: object is instantiated to receive a response message from the queueing system after an rpc.call
@@ -563,29 +561,25 @@ The diagram below shows the message flow during an rpc.call operation:
 
 A Topic Publisher is instantiated and sends the message request to the queueing system and a Direct Consumer is instantiated to waiat for the response. The exchange will dispatch the message based on the routing key and the Topic Consumer will fetch it, then pass it to a Worker for that task. When this task is complete a Direct publisher is allocated to send the response message to the queueing system. This message is dispatched by the exchange and fetched by a Direct Consumer based on the routing key, then passed to the Invoker.
 
-![RPC Call pic]
-(http://docs.openstack.org/developer/nova/_images/flow1.png)
+![RPC Call pic](./resources/Architecture/RPC_call_pic.png)
 
 The diagram below shows the message flow during an rpc.cast operation:
 
 A Topic Publisher sends the message request into the queueing system, which is then dispatched by the exchange. It is fetched by the Topic Consumer based on the routing key and passed to the Worker for that task.
 
-![RPC Cast Pic]
-(http://docs.openstack.org/developer/nova/_images/flow2.png)
+![RPC Cast Pic](./resources/Architecture/RPC_cast_pic.png)
 
 ### 2.3 Filter Scheduler ###
 
 The Filter Scheduler uses filtering and weighting to make informed decisions on where a new instance should be created on a Compute Node.
 
-![Threading Model]
-(http://docs.openstack.org/developer/nova/_images/filteringWorkflow1.png)
+![Threading Model](./resources/Architecture/Threading_Model.png)
 
 The Filter Scheduler looks over all compute nodes and evaluates them against a set of filters. The filters will eliminate some of the hosts, and the resulting hosts will be weighted, which will sort them by suitability. The Scheduler will then choose the hosts for each instance based on the weights. It is possible that the Scheduler may not find any candidate for the next instance, in which case that instance will not be booted. If the default scheduling algorithm is insufficient for a users needs, that user can create their own scheduling algorithm. There are a lot of built in functions that can be used to define the filtering algorithm.
 
 The weighing process is defined by equations which can also be set by the user. Different properties, such as RAM usage, CPU usage, Disk usage, I/O usage, etc, can be assigned different values in order to use a custom sorting to choose which host is the most suitable for the new instance(s).
 
-![Weighing]
-(http://docs.openstack.org/developer/nova/_images/filteringWorkflow2.png)
+![Weighing](./resources/Architecture/Weighing.png)
 
 ### 2.4 Threading Model ###
 
@@ -700,21 +694,21 @@ The versioned notification concept is created to fix the shortcomings of the unv
 
 ****Allowed State Transitions****
 
-![](http://docs.openstack.org/developer/nova/_images/graphviz-aa3b50f03fc95e5ea0896d5f2c606d809e3e2741.png)
+![VM State Transitions](./resources/Architecture/VM_State_Transitions.png)
 
 ****Requirements for Commands****
 
-![](http://i195.photobucket.com/albums/z7/BrandonIzzy/reqCmds_zpsklfqiwvw.png)
+![Command Requirements](./resources/Architecture/Command_Requirements.png)
 
 ****VM states and Possible Commands****
 
-![](http://i195.photobucket.com/albums/z7/BrandonIzzy/statesAndCmds_zpsqigexi5x.png)
+![VM State Commands](./resources/Architecture/VM_State_Commands.png)
 
 ****Create Instance States****
 
 The following diagram shows the sequence of VM states, task states, and power states when a new VM instance is created.
 
-![](http://docs.openstack.org/developer/nova/_images/create_vm_states.svg) 
+![Create VM States](./resources/Architecture/Create_VM_States.svg) 
 
 
 
