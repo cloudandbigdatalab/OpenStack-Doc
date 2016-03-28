@@ -123,6 +123,8 @@ tox -e cover
 
 ### 3.2 Devstack
 
+Devstack can be configured to enable magnum support. It is easy to develop magnum with the devstack environment. Magnum depends on nova, glance, heat and neutron to create and schedule virtual machines to simulate bare-metal (full bare-metal support is under active development).
+
 ## 4. CLI
 Magnum is used through the *magnum* Python client. To interact with bays (create pods, run containers, etc.) you use the magnum client, not the kubectl or docker-swarm clients. Here's a partial overview of the available commands.
 
