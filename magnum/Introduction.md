@@ -76,7 +76,7 @@ sudo apt-get update
 sudo apt-get install -y python-dev libssl-dev libxml2-dev \
                         libmysqlclient-dev libxslt-dev libpq-dev git \
                         libffi-dev gettext build-essential
-                        
+
 curl -s https://bootstrap.pypa.io/get-pip.py | sudo python
 
 sudo pip install virtualenv flake8 tox testrepository git-review
@@ -85,6 +85,22 @@ sudo pip install virtualenv flake8 tox testrepository git-review
 You may need to explicitly upgrade virtualenv to prevent tox errors:
 ```
 sudo pip install -U virtualenv
+```
+
+Add a *stack* user. Don't run services as root.
+```
+adduser stack
+```
+
+Since this user will be making many changes to your system, it will need to have sudo privileges:
+```
+apt-get install sudo -y || yum install -y sudo
+echo "stack ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+```
+
+From here on you should use the user you created. Logout and login as that user or run:
+```
+su - stack
 ```
 
 Pull Magnum source code:
@@ -165,10 +181,10 @@ cat >> /opt/stack/devstack/local.conf << END
 enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer
 END
 ```
-More devstack configuration information can be found at 
+More devstack configuration information can be found at
 <http://docs.openstack.org/developer/devstack/configuration.html>
 
-More neutron configuration information can be found at 
+More neutron configuration information can be found at
 <http://docs.openstack.org/developer/devstack/guides/neutron.html>
 
 Run devstack:
@@ -199,10 +215,12 @@ glance -v image-list
 | 02c312e3-2d30-43fd-ab2d-1d25622c0eaa | fedora-21-atomic-5              | qcow2       | bare             | 770179072 | active |
 +--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
 ```
+
 To list the available commands and resources for magnum, use:
 ```
 magnum help
 ```
+
 To list out the health of the internal services, namely conductor, of magnum, use:
 ```
 magnum service-list
@@ -213,9 +231,6 @@ magnum service-list
 | 1  | oxy-dev.hq1-0a5a3c02.hq1.abcde.com | magnum-conductor | up    |
 +----+------------------------------------+------------------+-------+
 ```
-
-
-
 
 ## 4. CLI
 Magnum is used through the *magnum* Python client. To interact with bays (create pods, run containers, etc.) you use the magnum client, not the kubectl or docker-swarm clients. Here's a partial overview of the available commands.

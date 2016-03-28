@@ -1,0 +1,41 @@
+# cloud-config
+
+users:
+  - name: stack
+    lock_passwd: False
+    sudo: ["ALL=(ALL) NOPASSWD:ALL\nDefaults:stack !requiretty"]
+    shell: /bin/bash
+
+packages:
+  - python-dev
+  - libssl-dev
+  - libxml2-dev
+  - libmysqlclient-dev
+  - libxslt-dev
+  - libpq-dev
+  - git
+  - libffi-dev
+  - gettext
+  - build-essential
+
+write_files:
+  - content: |
+      '[[local|localrc]]'
+      ADMIN_PASSWORD=password
+      DATABASE_PASSWORD=password
+      RABBIT_PASSWORD=password
+      SERVICE_PASSWORD=password
+      SERVICE_TOKEN=password
+      PUBLIC_INTERFACE=eth1
+      VOLUME_BACKING_FILE_SIZE=20G
+      enable_plugin magnum https://git.openstack.org/openstack/magnum
+      enable_plugin barbican https://git.openstack.org/openstack/barbican
+    owner: stack
+    path: /home/stack/devstack/local.conf
+
+runcmd:
+  - curl -s https://bootstrap.pypa.io/get-pip.py | sudo python
+  - pip install virtualenv flake8 tox testrepository git-review
+  - pip install -U virtualenv
+  - git clone https://git.openstack.org/openstack-dev/devstack /home/stack/devstack
+  - su -l stack /home/stack/devstack/stack.sh
