@@ -68,7 +68,9 @@ All subsequent requests to this bay (say to create a pod) will again pass from t
 ## 3. Installation
 **Note:** Assuming Ubuntu 14.04 and running Magnum on DevStack in a VM is not recommended at this time.
 
-### 3.1 Setup Dev Environment
+### 3.1. DevStack
+
+#### 3.1.1. Setup Dev Environment
 
 Add a *stack* user. Don't run services as root.
 ```
@@ -137,7 +139,7 @@ To run unit test coverage and check percentage of code covered:
 tox -e cover
 ```
 
-### 3.2 Devstack
+#### 3.1.2. Devstack
 
 Devstack can be configured to enable magnum support. It is easy to develop magnum with the devstack environment. Magnum depends on nova, glance, heat and neutron to create and schedule virtual machines to simulate bare-metal (full bare-metal support is under active development).
 
@@ -231,6 +233,10 @@ magnum service-list
 | 1  | oxy-dev.hq1-0a5a3c02.hq1.abcde.com | magnum-conductor | up    |
 +----+------------------------------------+------------------+-------+
 ```
+
+### 3.2. Service by Service / Production
+Magnum does not currently have documentation on how to install it "service by service" or in a production setup. Usage is still centered around developing using DevStack. There seems to be some movement to create a guide but there isn't a formal blueprint or progress being made on it. There's discussion of it below.
+<https://openstack.nimeyo.com/62358/openstack-operators-how-to-install-magnum?start=0#a_list_title>
 
 ## 4. CLI
 Magnum is used through the *magnum* Python client. To interact with bays (create pods, run containers, etc.) you use the magnum client, not the kubectl or docker-swarm clients. Here's a partial overview of the available commands.
