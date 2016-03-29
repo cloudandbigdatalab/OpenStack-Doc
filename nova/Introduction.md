@@ -28,6 +28,7 @@
   - 4.3) Accessing Instances
 - 5) Definitions
 - 6) Code Review
+	- 6.1) Nova Code Directory Structure
 - 7) Code Contribution
 - 8) References
 
@@ -1222,6 +1223,427 @@ Reconstructs the image using a new image while maintaining its other properties
 **Fault tolerance** - Fault tolerance is the property that enables a system to continue operating properly in the event of the failure of (or one or more faults within) some of its components.
 
 ## 6. Code Review ##
+
+### 6.1 Nova Code Directory Structure ###
+
+    nova
+    |-- api-guide
+    |   `-- source
+    |-- contrib
+    |   `-- xen
+    |-- devstack
+    |-- doc
+    |   |-- api_samples
+    |   |   |-- all_extensions
+    |   |   |-- consoles
+    |   |   |-- extension-info
+    |   |   |-- flavor-access
+    |   |   |-- flavor-extra-specs
+    |   |   |-- flavor-manage
+    |   |   |-- flavors
+    |   |   |-- images
+    |   |   |-- keypairs
+    |   |   |   |-- v2.10
+    |   |   |   `-- v2.2
+    |   |   |-- limits
+    |   |   |-- os-access-ips
+    |   |   |-- os-admin-actions
+    |   |   |-- os-admin-password
+    |   |   |-- os-agents
+    |   |   |-- os-aggregates
+    |   |   |-- os-assisted-volume-snapshots
+    |   |   |-- os-attach-interfaces
+    |   |   |-- os-availability-zone
+    |   |   |-- os-baremetal-nodes
+    |   |   |-- os-cells
+    |   |   |-- os-certificates
+    |   |   |-- os-cloudpipe
+    |   |   |-- os-config-drive
+    |   |   |-- os-console-auth-tokens
+    |   |   |-- os-console-output
+    |   |   |-- os-create-backup
+    |   |   |-- os-deferred-delete
+    |   |   |-- os-disk-config
+    |   |   |-- os-evacuate
+    |   |   |   `-- v2.14
+    |   |   |-- os-extended-availability-zone
+    |   |   |-- os-extended-server-attributes
+    |   |   |   |-- v2.16
+    |   |   |   `-- v2.3
+    |   |   |-- os-extended-status
+    |   |   |-- os-extended-volumes
+    |   |   |   `-- v2.3
+    |   |   |-- os-fixed-ips
+    |   |   |   `-- v2.4
+    |   |   |-- os-flavor-rxtx
+    |   |   |-- os-floating-ip-dns
+    |   |   |-- os-floating-ip-pools
+    |   |   |-- os-floating-ips
+    |   |   |-- os-floating-ips-bulk
+    |   |   |-- os-fping
+    |   |   |-- os-hide-server-addresses
+    |   |   |-- os-hosts
+    |   |   |-- os-hypervisors
+    |   |   |-- os-instance-actions
+    |   |   |   `-- v2.21
+    |   |   |-- os-instance-usage-audit-log
+    |   |   |-- os-lock-server
+    |   |   |-- os-migrate-server
+    |   |   |   `-- v2.25
+    |   |   |-- os-migrations
+    |   |   |   `-- v2.23
+    |   |   |-- os-multinic
+    |   |   |-- os-multiple-create
+    |   |   |-- os-networks
+    |   |   |-- os-networks-associate
+    |   |   |-- os-pause-server
+    |   |   |-- os-pci
+    |   |   |-- os-personality
+    |   |   |-- os-preserve-ephemeral-rebuild
+    |   |   |-- os-quota-class-sets
+    |   |   |-- os-quota-sets
+    |   |   |-- os-remote-consoles
+    |   |   |   |-- v2.6
+    |   |   |   `-- v2.8
+    |   |   |-- os-rescue
+    |   |   |-- os-scheduler-hints
+    |   |   |-- os-security-group-default-rules
+    |   |   |-- os-security-groups
+    |   |   |-- os-server-diagnostics
+    |   |   |-- os-server-external-events
+    |   |   |-- os-server-groups
+    |   |   |   `-- v2.13
+    |   |   |-- os-server-password
+    |   |   |-- os-server-usage
+    |   |   |-- os-services
+    |   |   |   `-- v2.11
+    |   |   |-- os-shelve
+    |   |   |-- os-simple-tenant-usage
+    |   |   |-- os-suspend-server
+    |   |   |-- os-tenant-networks
+    |   |   |-- os-used-limits
+    |   |   |-- os-user-data
+    |   |   |-- os-virtual-interfaces
+    |   |   |   `-- v2.12
+    |   |   |-- os-volumes
+    |   |   |-- server-ips
+    |   |   |-- server-metadata
+    |   |   |-- server-migrations
+    |   |   |   `-- v2.23
+    |   |   |-- servers
+    |   |   |   |-- v2.16
+    |   |   |   |-- v2.17
+    |   |   |   |-- v2.19
+    |   |   |   `-- v2.9
+    |   |   |-- servers-sort
+    |   |   `-- versions
+    |   |-- ext
+    |   |-- notification_samples
+    |   `-- source
+    |       |-- _ga
+    |       |-- _static
+    |       |-- image_src
+    |       |-- images
+    |       |   `-- rpc
+    |       |-- man
+    |       `-- testing
+    |-- etc
+    |   `-- nova
+    |       `-- rootwrap.d
+    |-- nova
+    |   |-- CA
+    |   |   |-- newcerts
+    |   |   |-- private
+    |   |   |-- projects
+    |   |   `-- reqs
+    |   |-- api
+    |   |   |-- ec2
+    |   |   |-- metadata
+    |   |   |-- openstack
+    |   |   |   `-- compute
+    |   |   |       |-- legacy_v2
+    |   |   |       |   `-- contrib
+    |   |   |       |-- schemas
+    |   |   |       `-- views
+    |   |   `-- validation
+    |   |-- cells
+    |   |   |-- filters
+    |   |   `-- weights
+    |   |-- cert
+    |   |-- cloudpipe
+    |   |-- cmd
+    |   |-- common
+    |   |-- compute
+    |   |   |-- monitors
+    |   |   |   `-- cpu
+    |   |   `-- resources
+    |   |-- conductor
+    |   |   `-- tasks
+    |   |-- conf
+    |   |-- console
+    |   |-- consoleauth
+    |   |-- db
+    |   |   `-- sqlalchemy
+    |   |       |-- api_migrations
+    |   |       |   `-- migrate_repo
+    |   |       |       `-- versions
+    |   |       `-- migrate_repo
+    |   |           `-- versions
+    |   |-- hacking
+    |   |-- image
+    |   |   `-- download
+    |   |-- ipv6
+    |   |-- keymgr
+    |   |-- locale
+    |   |   |-- cs
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- de
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- es
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- es_MX
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- fr
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- hr
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- it
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- ja
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- ko_KR
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- pa_IN
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- pt_BR
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- ru
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- tr_TR
+    |   |   |   `-- LC_MESSAGES
+    |   |   |-- zh_CN
+    |   |   |   `-- LC_MESSAGES
+    |   |   `-- zh_TW
+    |   |       `-- LC_MESSAGES
+    |   |-- mks
+    |   |-- network
+    |   |   |-- neutronv2
+    |   |   `-- security_group
+    |   |-- objects
+    |   |-- openstack
+    |   |   `-- common
+    |   |-- pci
+    |   |-- rdp
+    |   |-- scheduler
+    |   |   |-- client
+    |   |   |-- filters
+    |   |   `-- weights
+    |   |-- servicegroup
+    |   |   `-- drivers
+    |   |-- spice
+    |   |-- tests
+    |   |   |-- functional
+    |   |   |   |-- api
+    |   |   |   |-- api_sample_tests
+    |   |   |   |   `-- api_samples
+    |   |   |   |       |-- all_extensions
+    |   |   |   |       |-- consoles
+    |   |   |   |       |-- extension-info
+    |   |   |   |       |-- flavor-access
+    |   |   |   |       |-- flavor-extra-specs
+    |   |   |   |       |-- flavor-manage
+    |   |   |   |       |-- flavors
+    |   |   |   |       |-- images
+    |   |   |   |       |-- keypairs
+    |   |   |   |       |   |-- v2.10
+    |   |   |   |       |   `-- v2.2
+    |   |   |   |       |-- limits
+    |   |   |   |       |-- os-access-ips
+    |   |   |   |       |-- os-admin-actions
+    |   |   |   |       |-- os-admin-password
+    |   |   |   |       |-- os-agents
+    |   |   |   |       |-- os-aggregates
+    |   |   |   |       |-- os-assisted-volume-snapshots
+    |   |   |   |       |-- os-attach-interfaces
+    |   |   |   |       |-- os-availability-zone
+    |   |   |   |       |-- os-baremetal-nodes
+    |   |   |   |       |-- os-cells
+    |   |   |   |       |-- os-certificates
+    |   |   |   |       |-- os-cloudpipe
+    |   |   |   |       |-- os-config-drive
+    |   |   |   |       |-- os-console-auth-tokens
+    |   |   |   |       |-- os-console-output
+    |   |   |   |       |-- os-create-backup
+    |   |   |   |       |-- os-deferred-delete
+    |   |   |   |       |-- os-disk-config
+    |   |   |   |       |-- os-evacuate
+    |   |   |   |       |   `-- v2.14
+    |   |   |   |       |-- os-extended-availability-zone
+    |   |   |   |       |-- os-extended-server-attributes
+    |   |   |   |       |   `-- v2.16
+    |   |   |   |       |-- os-extended-status
+    |   |   |   |       |-- os-extended-volumes
+    |   |   |   |       |-- os-fixed-ips
+    |   |   |   |       |   `-- v2.4
+    |   |   |   |       |-- os-flavor-rxtx
+    |   |   |   |       |-- os-floating-ip-dns
+    |   |   |   |       |-- os-floating-ip-pools
+    |   |   |   |       |-- os-floating-ips
+    |   |   |   |       |-- os-floating-ips-bulk
+    |   |   |   |       |-- os-fping
+    |   |   |   |       |-- os-hide-server-addresses
+    |   |   |   |       |-- os-hosts
+    |   |   |   |       |-- os-hypervisors
+    |   |   |   |       |-- os-instance-actions
+    |   |   |   |       |   `-- v2.21
+    |   |   |   |       |-- os-instance-usage-audit-log
+    |   |   |   |       |-- os-lock-server
+    |   |   |   |       |-- os-migrate-server
+    |   |   |   |       |   `-- v2.25
+    |   |   |   |       |-- os-migrations
+    |   |   |   |       |   `-- v2.23
+    |   |   |   |       |-- os-multinic
+    |   |   |   |       |-- os-multiple-create
+    |   |   |   |       |-- os-networks
+    |   |   |   |       |-- os-networks-associate
+    |   |   |   |       |-- os-pause-server
+    |   |   |   |       |-- os-pci
+    |   |   |   |       |-- os-personality
+    |   |   |   |       |-- os-preserve-ephemeral-rebuild
+    |   |   |   |       |-- os-quota-class-sets
+    |   |   |   |       |-- os-quota-sets
+    |   |   |   |       |-- os-remote-consoles
+    |   |   |   |       |   |-- v2.6
+    |   |   |   |       |   `-- v2.8
+    |   |   |   |       |-- os-rescue
+    |   |   |   |       |-- os-scheduler-hints
+    |   |   |   |       |-- os-security-group-default-rules
+    |   |   |   |       |-- os-security-groups
+    |   |   |   |       |-- os-server-diagnostics
+    |   |   |   |       |-- os-server-external-events
+    |   |   |   |       |-- os-server-groups
+    |   |   |   |       |   `-- v2.13
+    |   |   |   |       |-- os-server-password
+    |   |   |   |       |-- os-server-usage
+    |   |   |   |       |-- os-services
+    |   |   |   |       |   `-- v2.11
+    |   |   |   |       |-- os-shelve
+    |   |   |   |       |-- os-simple-tenant-usage
+    |   |   |   |       |-- os-suspend-server
+    |   |   |   |       |-- os-tenant-networks
+    |   |   |   |       |-- os-used-limits
+    |   |   |   |       |-- os-user-data
+    |   |   |   |       |-- os-virtual-interfaces
+    |   |   |   |       |   `-- v2.12
+    |   |   |   |       |-- os-volumes
+    |   |   |   |       |-- server-ips
+    |   |   |   |       |-- server-metadata
+    |   |   |   |       |-- server-migrations
+    |   |   |   |       |   `-- v2.23
+    |   |   |   |       |-- servers
+    |   |   |   |       |   |-- v2.17
+    |   |   |   |       |   |-- v2.19
+    |   |   |   |       |   `-- v2.9
+    |   |   |   |       |-- servers-sort
+    |   |   |   |       `-- versions
+    |   |   |   |-- db
+    |   |   |   |   `-- api
+    |   |   |   |-- libvirt
+    |   |   |   |-- notification_sample_tests
+    |   |   |   |-- regressions
+    |   |   |   `-- wsgi
+    |   |   |-- live_migration
+    |   |   |   `-- hooks
+    |   |   `-- unit
+    |   |       |-- api
+    |   |       |   `-- openstack
+    |   |       |       `-- compute
+    |   |       |           `-- legacy_v2
+    |   |       |               `-- extensions
+    |   |       |-- api_samples_test_base
+    |   |       |-- cells
+    |   |       |-- cert
+    |   |       |-- cmd
+    |   |       |-- compute
+    |   |       |   `-- monitors
+    |   |       |       `-- cpu
+    |   |       |-- conductor
+    |   |       |   `-- tasks
+    |   |       |-- console
+    |   |       |-- consoleauth
+    |   |       |-- db
+    |   |       |-- fake_loadables
+    |   |       |-- image
+    |   |       |-- keymgr
+    |   |       |-- monkey_patch_example
+    |   |       |-- network
+    |   |       |   `-- security_group
+    |   |       |-- objects
+    |   |       |-- pci
+    |   |       |-- scheduler
+    |   |       |   |-- filters
+    |   |       |   `-- weights
+    |   |       |-- servicegroup
+    |   |       |-- ssl_cert
+    |   |       |-- virt
+    |   |       |   |-- disk
+    |   |       |   |   |-- mount
+    |   |       |   |   `-- vfs
+    |   |       |   |-- hyperv
+    |   |       |   |-- image
+    |   |       |   |-- ironic
+    |   |       |   |-- libvirt
+    |   |       |   |   |-- storage
+    |   |       |   |   `-- volume
+    |   |       |   |-- vmwareapi
+    |   |       |   `-- xenapi
+    |   |       |       |-- client
+    |   |       |       |-- image
+    |   |       |       `-- plugins
+    |   |       `-- volume
+    |   |           `-- encryptors
+    |   |-- virt
+    |   |   |-- disk
+    |   |   |   |-- mount
+    |   |   |   `-- vfs
+    |   |   |-- hyperv
+    |   |   |-- image
+    |   |   |-- ironic
+    |   |   |-- libvirt
+    |   |   |   |-- storage
+    |   |   |   `-- volume
+    |   |   |-- vmwareapi
+    |   |   `-- xenapi
+    |   |       |-- client
+    |   |       `-- image
+    |   |-- vnc
+    |   |-- volume
+    |   |   `-- encryptors
+    |   `-- wsgi
+    |-- nova.egg-info
+    |-- plugins
+    |   `-- xenserver
+    |       |-- doc
+    |       |-- networking
+    |       |   `-- etc
+    |       |       |-- init.d
+    |       |       |-- sysconfig
+    |       |       |-- udev
+    |       |       |   `-- rules.d
+    |       |       `-- xensource
+    |       |           `-- scripts
+    |       `-- xenapi
+    |           `-- etc
+    |               `-- xapi.d
+    |                   `-- plugins
+    |-- releasenotes
+    |   |-- notes
+    |   `-- source
+    |       |-- _static
+    |       `-- _templates
+    `-- tools
+        |-- db
+        `-- xenserver
 
 ## 7. Code Contribution ##
 
