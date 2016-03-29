@@ -143,6 +143,9 @@ tox -e cover
 
 Devstack can be configured to enable magnum support. It is easy to develop magnum with the devstack environment. Magnum depends on nova, glance, heat and neutron to create and schedule virtual machines to simulate bare-metal (full bare-metal support is under active development).
 
+NOTE: This guide installs Magnum using plugins, you can also install manually.
+<http://docs.openstack.org/developer/magnum/dev/manual-devstack.html>
+
 NOTE: Running devstack within a virtual machine with magnum enabled is not recommended at this time.
 
 This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21. We recommend users to select one of them if it is possible.
