@@ -52,8 +52,8 @@ Magnum utilizes the typical OpenStack services: Nova, Neutron, Glance, Cinder an
 
 Heat is an orchestration tool that allows for automating usage of the other OpenStack services. Magnum does not reinvent the wheel with orchestration, it adds another layer on top of Heat to further automate the creation of resources for container usage.
 
-![Screenshot of Heat Stack in Horizon](./photos/magnum_heat.png)
-*Screenshot of Kubernetes Heat stack in Horizon.*
+![Screenshot of Heat Stack in Horizon](./photos/bay_heat_stack.png)
+*Screenshot of Bay Heat stack in Horizon.*
 
 ### 2.2. Detail of Communication Flow
 Clients communicate requests to the magnum-api. The magnum-api then communicates requests to the magnum-conductor. The magnum-conductor interacts with Heat, Docker, and the COE.
@@ -66,7 +66,171 @@ All subsequent requests to this bay (say to create a pod) will again pass from t
 *Flow of communication through magnum components.*
 
 ## 3. Installation
-Magnum can be installed in DevStack by enabling the plugin in your `local.conf`. `enable_plugin magnum https://git.openstack.org/openstack/magnum` The full details can be found [here](http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#exercising-the-services-using-devstack) The [Cloud Init](./cloud.init) file in this directory can be used to initialize a cloud machine with DevStack and Magnum.
+**Note:** Assuming Ubuntu 14.04 and running Magnum on DevStack in a VM is not recommended at this time.
+
+### 3.1 Setup Dev Environment
+
+Add a *stack* user. Don't run services as root.
+```
+adduser stack
+```
+
+Since this user will be making many changes to your system, it will need to have sudo privileges:
+```
+apt-get install sudo -y
+echo "stack ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+```
+
+From here on you should use the user you created. Logout and login as that user or run:
+```
+su - stack
+```
+
+Install OS prerequisites, pip, and common pip prerequisites:
+```
+sudo apt-get update
+sudo apt-get install -y python-dev libssl-dev libxml2-dev \
+                        libmysqlclient-dev libxslt-dev libpq-dev git \
+                        libffi-dev gettext build-essential
+
+curl -s https://bootstrap.pypa.io/get-pip.py | sudo python
+
+sudo pip install virtualenv flake8 tox testrepository git-review
+```
+
+You may need to explicitly upgrade virtualenv to prevent tox errors:
+```
+sudo pip install -U virtualenv
+```
+
+Pull Magnum source code:
+```
+cd ~
+git clone https://git.openstack.org/openstack/magnum
+cd magnum
+```
+
+To run Magnum's entire test suite (optional, takes time, not required at install):
+```
+tox
+```
+
+To run a specific test, use a positional argument for the unit tests:
+```
+# run a specific test for Python 2.7
+tox -epy27 -- test_conductor
+```
+
+You may pass options to the test programs using positional arguments:
+```
+# run all the Python 2.7 unit tests (in parallel!)
+tox -epy27 -- --parallel
+```
+
+To run only the pep8/flake8 syntax and style checks:
+```
+tox -epep8
+```
+
+To run unit test coverage and check percentage of code covered:
+```
+tox -e cover
+```
+
+### 3.2 Devstack
+
+Devstack can be configured to enable magnum support. It is easy to develop magnum with the devstack environment. Magnum depends on nova, glance, heat and neutron to create and schedule virtual machines to simulate bare-metal (full bare-metal support is under active development).
+
+NOTE: Running devstack within a virtual machine with magnum enabled is not recommended at this time.
+
+This session has only been tested on Ubuntu 14.04 (Trusty) and Fedora 20/21. We recommend users to select one of them if it is possible.
+
+For in-depth guidance on adding magnum manually to a devstack instance, please refer to the <http://docs.openstack.org/developer/magnum/dev/dev-manual-devstack.html>
+
+Clone devstack:
+```
+# Create a root directory for devstack if needed
+sudo mkdir -p /opt/stack
+sudo chown $USER /opt/stack
+
+git clone https://git.openstack.org/openstack-dev/devstack /opt/stack/devstack
+```
+We will run devstack with minimal local.conf settings required to enable magnum, heat, and neutron (neutron is enabled by default in devstack since Kilo, and heat is enabled by the magnum plugin):
+```
+cat > /opt/stack/devstack/local.conf << END
+[[local|localrc]]
+DATABASE_PASSWORD=password
+RABBIT_PASSWORD=password
+SERVICE_TOKEN=password
+SERVICE_PASSWORD=password
+ADMIN_PASSWORD=password
+# magnum requires the following to be set correctly
+PUBLIC_INTERFACE=eth1
+enable_plugin magnum https://git.openstack.org/openstack/magnum
+# Enable barbican service and use it to store TLS certificates
+# For details http://docs.openstack.org/developer/magnum/dev/dev-tls.html
+enable_plugin barbican https://git.openstack.org/openstack/barbican
+VOLUME_BACKING_FILE_SIZE=20G
+END
+```
+**NOTE:** Update PUBLIC_INTERFACE as appropriate for your system.
+
+Optionally, you can enable ceilometer in devstack. If ceilometer is enabled, magnum will periodically send metrics to ceilometer:
+```
+cat >> /opt/stack/devstack/local.conf << END
+enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer
+END
+```
+More devstack configuration information can be found at
+<http://docs.openstack.org/developer/devstack/configuration.html>
+
+More neutron configuration information can be found at
+<http://docs.openstack.org/developer/devstack/guides/neutron.html>
+
+Run devstack:
+```
+cd /opt/stack/devstack
+./stack.sh
+```
+**NOTE:** This will take a little extra time when the Fedora Atomic micro-OS image is downloaded for the first time.
+
+At this point, two magnum process (magnum-api and magnum-conductor) will be running on devstack screens. If you make some code changes and want to test their effects, just stop and restart magnum-api and/or magnum-conductor.
+
+Prepare your session to be able to use the various openstack clients including magnum, neutron, and glance. Create a new shell, and source the devstack openrc script:
+```
+source /opt/stack/devstack/openrc admin admin
+```
+Magnum has been tested with the Fedora Atomic micro-OS and CoreOS. Magnum will likely work with other micro-OS platforms, but each requires individual support in the heat template.
+
+The Fedora Atomic micro-OS image will automatically be added to glance. You can add additional images manually through glance. To verify the image created when installing devstack use:
+```
+glance -v image-list
+
++--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
+| ID                                   | Name                            | Disk Format | Container Format | Size      | Status |
++--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
+| 7f5b6a15-f2fd-4552-aec5-952c6f6d4bc7 | cirros-0.3.4-x86_64-uec         | ami         | ami              | 25165824  | active |
+| bd3c0f92-669a-4390-a97d-b3e0a2043362 | cirros-0.3.4-x86_64-uec-kernel  | aki         | aki              | 4979632   | active |
+| 843ce0f7-ae51-4db3-8e74-bcb860d06c55 | cirros-0.3.4-x86_64-uec-ramdisk | ari         | ari              | 3740163   | active |
+| 02c312e3-2d30-43fd-ab2d-1d25622c0eaa | fedora-21-atomic-5              | qcow2       | bare             | 770179072 | active |
++--------------------------------------+---------------------------------+-------------+------------------+-----------+--------+
+```
+
+To list the available commands and resources for magnum, use:
+```
+magnum help
+```
+
+To list out the health of the internal services, namely conductor, of magnum, use:
+```
+magnum service-list
+
++----+------------------------------------+------------------+-------+
+| id | host                               | binary           | state |
++----+------------------------------------+------------------+-------+
+| 1  | oxy-dev.hq1-0a5a3c02.hq1.abcde.com | magnum-conductor | up    |
++----+------------------------------------+------------------+-------+
+```
 
 ## 4. CLI
 Magnum is used through the *magnum* Python client. To interact with bays (create pods, run containers, etc.) you use the magnum client, not the kubectl or docker-swarm clients. Here's a partial overview of the available commands.
@@ -412,4 +576,6 @@ magnum/
 <http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#using-kubernetes-bay>
 <https://en.wikipedia.org/wiki/Operating-system-level_virtualization>
 <https://en.wikipedia.org/wiki/Docker_(software)>
-<http://docs.openstack.org/developer/magnum/#architecture>
+<http://docs.openstack.org/developer/magnum/#architecture>  
+<http://docs.openstack.org/developer/magnum/dev/dev-quickstart.html#setup-dev-environment>  
+<http://docs.openstack.org/developer/devstack/guides/single-machine.html>
