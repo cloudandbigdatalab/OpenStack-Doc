@@ -1645,6 +1645,26 @@ Reconstructs the image using a new image while maintaining its other properties
         |-- db
         `-- xenserver
 
+### 6.2 Bugs ###
+
+#### 6.3.1 nova set-password returns a vague error message ####
+
+https://bugs.launchpad.net/nova/+bug/1562670
+
+The ability to use "nova set-password [password]" via CLI is not working properly.  This means that a user cannot change the password on an instance they have created via that command.  Initial research of "nova set-password" has not revealed any detailed documentation.  We are in the process of communicating with the OpenStack community as to whether or not our environment is configured properly, or if this is normal behavior.
+
+**Recreation**
+
+1)  Create an instance
+
+    nova boot --flavor 1 --image cirros-0.3.4-x86_64-uec testing
+
+2)  Attempt to change its password
+
+    nova set-password [ID]
+
+![1562670 recreation](./resources/code_review/1562670_recreation.png)
+
 ## 7. Code Contribution ##
 
 ## 8. References ##
