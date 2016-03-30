@@ -5,6 +5,7 @@
 - 2) Architecture
 	- 2.1) Nova REST API
 	- 2.2) Messaging
+	- 2.2.1) Oslo/Messaging
 	- 2.3) Filter Scheduler
 	- 2.4) Threading Model
 	- 2.5) Block Device Mapping
@@ -31,6 +32,7 @@
 	- 6.1) Nova Code Directory Structure
 	- 6.2) Bugs
 		- 6.2.1) nova set-password returns a vague error message
+		- 6.2.2) nova dashboard displays wrong quotas
 - 7) Code Contribution
 - 8) References
 
@@ -544,7 +546,7 @@ The architecture can be explained by the following picture:
 
 Nova provides an adapter class which will marshal and unmarshal the messages from the RPC calls into function calls. 
 
-#### Nova RPC Mappings####
+#### Nova RPC Mappings (RPC Explanation) ####
 Each Nova component will connect to a message broker node and will use the queue as either a Worker(Compute or Network) or an Invoker (API or Scheduler). Keep in mind that Workers and Invokers are just conceptual to aid in understanding, and do not actually exist as Nova objects. Invokers send messages in the queue system via rpc.call and rpc.cast, Workers receive messages from the queue system and reply to rpc.call operations.
 
 The following figure shows the message broker node and how it interacts with the different pieces. They are described below.
@@ -559,7 +561,7 @@ The following figure shows the message broker node and how it interacts with the
 - Direct Exchange: routing table created during rpc.call operations, an instance is created for each rpc.call invocation
 - Queue Element: Messages are kept in the queue until a Topic or Direct Consumer connects to fetch it. Queues can be shared amongst Workers of the same type (Compute node, Network node, etc)
 
-#### RPC Calls and Casts####
+#### RPC Calls and Casts (RPC Demonstration) ####
 The diagram below shows the message flow during an rpc.call operation:
 
 A Topic Publisher is instantiated and sends the message request to the queueing system and a Direct Consumer is instantiated to waiat for the response. The exchange will dispatch the message based on the routing key and the Topic Consumer will fetch it, then pass it to a Worker for that task. When this task is complete a Direct publisher is allocated to send the response message to the queueing system. This message is dispatched by the exchange and fetched by a Direct Consumer based on the routing key, then passed to the Invoker.
@@ -571,6 +573,69 @@ The diagram below shows the message flow during an rpc.cast operation:
 A Topic Publisher sends the message request into the queueing system, which is then dispatched by the exchange. It is fetched by the Topic Consumer based on the routing key and passed to the Worker for that task.
 
 ![RPC Cast Pic](./resources/Architecture/RPC_cast_pic.png)
+
+### 2.2.1 Oslo/Messaging ###
+The Oslo messaging library provides two independent APIs:
+
+- oslo.messaging.rpc for implementing client-server remote procedure calls
+- oslo.messaging.notify for emitting and handling event notifications
+
+They are part of the same library for mostly historical reasons - the most common transport mechanisms for oslo.messaging.notify are the transports used by oslo.messaging.rpc. 
+
+### oslo.messaging.rpc ###
+
+The RPC API defines semantics for addressing, procedure calls, broadcast calls, return values and error handling.
+
+There are multiple backend transport drivers which implement the API semantics using different messaging systems - e.g. RabbitMQ, Qpid, ZeroMQ. While both sides of a connection must use the same transport driver configured in the same way, the API avoids exposing details of transports so that code written using one transport should work with any other transport.
+
+The exception to this principle of abstraction is that the API exposes transport-specific configuration for how to connect to the messaging system itself. 
+
+****Use Cases****
+
+- Invoke Method on One of Multiple Servers
+	- This is where we have multiple servers listening for method invocations on a topic within an exchange, where both the exchange and topic names are well known to clients. When a client invokes a method on this topic, the invocation gets dispatched to one of the listening servers in round robin fashion.	
+- Invoke Method on a Specific Server
+	- This is where we have multiple servers listening for method invocations on a topic within an exchange, where both the exchange and topic names are well known to clients. However, in this case, the client wishes to invoke a method on a specific one of these servers.	 
+- Invoke Method on all of Multiple Servers
+	- This is where we have multiple servers listening for method invocations on a topic within an exchange, where both the exchange and topic names are well known to clients. In this case, the client wishes to invoke a method on all of these servers. 
+
+****Types Of Method Invocations****
+
+There are two ways that a method can be invoked:
+
+- cast - the method is invoked asynchronously and no result is returned to the caller
+- call - the method is invoked synchronously and a result is returned to the caller
+
+Note that the caller need not be aware of whether a method will be invoked using a cast or a call.
+
+****Transports****
+
+- Kombu/RabbitMQ
+- Qpid
+- ZeroMQ
+- Transport URLs
+
+****Targets****
+
+Methods are invoked on targets. Targets are described by the following parameters:
+
+- exchange (defaults to CONF.control_exchange)
+- topic
+- server (optional)
+- fanout (defaults to False)
+- namespace (optional)
+- API version (optional)
+
+### oslo.notify ###
+
+The notify API defines semantics for emitting and handling event notifications. 
+
+****Use Cases****
+
+- Ceilometer Metering Messages
+- Searchlight Resource Indexing
+	- Indexes information (currently into Elasticsearch) about resources across the various Openstack services to provide a unified search and caching layer for Horizon and other consumers
+
 
 ### 2.3 Filter Scheduler ###
 
@@ -1653,6 +1718,8 @@ Reconstructs the image using a new image while maintaining its other properties
 
 https://bugs.launchpad.net/nova/+bug/1562670
 
+****Description****
+
 The ability to use "nova set-password [password]" via CLI is not working properly.  This means that a user cannot change the password on an instance they have created via that command.  Initial research of "nova set-password" has not revealed any detailed documentation.  We are in the process of communicating with the OpenStack community as to whether or not our environment is configured properly, or if this is normal behavior.
 
 **Recreation**
@@ -1666,6 +1733,31 @@ The ability to use "nova set-password [password]" via CLI is not working properl
     nova set-password [ID]
 
 ![1562670 recreation](./resources/Code_Review/1562670_recreation.png)
+
+#### 6.2.2 nova dashboard displays wrong quotas ####
+
+https://bugs.launchpad.net/nova/+bug/1561310
+
+****Description****
+
+1. User tries to boot a new vm by click the button "+ Launch Instance" in dashboard web->project->compute->instances.
+2. But the button "+ Launch Instance" is disabled and shows "quota exceeded".
+3. Then the user goes to dashboard web->project->compute->overview perspective, but finds Instances,VCPU and RAM haven't exceed the quotas. In such a case, it shows like below:
+
+	Instances - Used 8 of 10
+
+	VCPUs - Used 18 of 20
+
+	RAM - Used 512MB of 50.0GB
+
+Assuming this truly is a bug, this would be severely limiting to the nova service in terms of not being able to use your full resource pool for computing. If the metrics gathered from nova aren't reflecting what is available to you in your dashboard then there has to be a disconnect on either the Dashboard's side or Nova's metric gathering side. This would also effect any service based customers in a negative financial way. If they aren't able to use all the resources they are paying for, or they are using more resources than what are shown, then this severely inhibits the ability to use an OpenStack paid service cost effectively. 
+
+****Recreation****
+
+Currently we are following the ongoing conversation to gather enough information to recreate this bug. We will also need resources allocated to us as well to do this.
+
+As of now, per the conversation on the bugs forum and our own attempts to recreate this bug. We are trying to confirm that this is a valid bug, and if it is valid, what versions of OpenStack does it pertain to. 
+
 
 ## 7. Code Contribution ##
 
@@ -1714,3 +1806,5 @@ The ability to use "nova set-password [password]" via CLI is not working properl
 [Nova VM States and Transistions](http://docs.openstack.org/developer/nova/vmstates.html)
 
 [Nova REST API](http://developer.openstack.org/api-ref-compute-v2.1.html)
+
+[Oslo/Messaging](https://wiki.openstack.org/wiki/Oslo/Messaging)
