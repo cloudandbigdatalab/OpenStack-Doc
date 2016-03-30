@@ -20,6 +20,7 @@
 		- 2.13.1) Glance
 		- 2.13.2) Neutron
 		- 2.13.3) Keystone
+	- 2.14) Nova-network
 - 3) Installation
 	- 3.1) Installing Nova from DevStack Source
 	- 3.2) Installing Nova from Packages 
@@ -929,6 +930,13 @@ Nova can access the Neutron API and get information about which Networks, subnet
 #### 2.13.3  Keystone ####
 
 Nova interacts with Keystone to perform authentication.  For instance, if a user wanted to create a new instance, Nova would need to send a request to Keystone with the user's password and username.  Keystone would then reply to Nova with a Token assuming the credentials were valid.  Nova will then use this token when it performs tasks by sending it to Keystone for validation.  In our example, if the token is valid, Nova can continue with making the  user's instance.  Tokens are valid for one hour by default.
+
+### 2.14 Nova-network ###
+
+Since the Folsom release of OpenStack, the networking has been handled by a service called Neutron. Prior to this release there was no networking specific service, and all the networking was handled by Nova, specifically Nova-network. The biggest obstacle with using Neutron for many users is that there is currently no clear migration path from nova-network to Neutron. For that reason, about 25% of live OpenStack production deployments still use nova-network.
+
+Neutron is a much more complete service, offering many more features than nova-network. Additionally, neutron is constantly being added onto and improved, much moreso than nova network. However, if you do not have complex use cases that benefit from fuller defined capabilities, nova-network can be simpler to use. Neutron also has many plugins available from vendors that are not available to nova-network. Some of the features not available to nova-network include Loadbalancer as a service, VPN as a service, Distributed Virtual Routers, and tunnel based isolation. 
+
 
 ## 3. Installation ##
 
