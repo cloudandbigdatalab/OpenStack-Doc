@@ -253,9 +253,25 @@ By default, ceilometer is not enabled in the devstack environment, so we need to
    +---------------+------+------------+---------------+------+---------------------+
 ```
 
+##6. Deploying Ceilometer over Devstack##
+1. Download Devstack
+2. Modify the local.conf file as your input to devstack.
+ 1. Ceilometer will use RabbitMQ
+ 2. An important note: The ceilometer services are not enabled by default, so they must be enabled in local.conf before running stack.sh.
+
+This example local.conf file shows all of the settings required for ceilometer:
+
+```
+[[local|localrc]]
+# Enable the Ceilometer devstack plugin
+enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer.git
+```
+
+3. Nova does not generate the periodic notifications for all known instances by default. To enable these auditing events, set instance_usage_audit to true in the nova configuration file and restart the service.
+4. Cinder does not generate notifications by default. To enable these auditing events, set the following in the cinder configuration file and restart the service:
 
 
-##6. References:##
+##7. References:##
 
 [1] most of the content is taken after reading  http://docs.openstack.org/developer/ceilometer/
 
