@@ -29,6 +29,8 @@
 - 5) Definitions
 - 6) Code Review
 	- 6.1) Nova Code Directory Structure
+	- 6.2) Bugs
+		- 6.2.1) nova set-password returns a vague error message
 - 7) Code Contribution
 - 8) References
 
@@ -1647,7 +1649,7 @@ Reconstructs the image using a new image while maintaining its other properties
 
 ### 6.2 Bugs ###
 
-#### 6.3.1 nova set-password returns a vague error message ####
+#### 6.2.1 nova set-password returns a vague error message ####
 
 https://bugs.launchpad.net/nova/+bug/1562670
 
@@ -1663,7 +1665,7 @@ The ability to use "nova set-password [password]" via CLI is not working properl
 
     nova set-password [ID]
 
-![1562670 recreation](./resources/code_review/1562670_recreation.png)
+![1562670 recreation](./resources/Code_Review/1562670_recreation.png)
 
 ## 7. Code Contribution ##
 
