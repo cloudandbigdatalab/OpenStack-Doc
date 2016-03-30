@@ -54,14 +54,14 @@ As the most distributed component in the OpenStack platform, Nova interacts heav
 
 This is the Nova component that receives HTTP requests, converts commands and communicates with other components via the oslo.messaging queue or HTTP.
 
-****List API versions****
+**List API versions**
 
 Lists information about all Compute API versions.
 
 - Lists information for all API versions. (GET)
 
 
-****Servers (servers)****
+**Servers (servers)**
 
 Lists, creates, shows details for, updates, and deletes servers. (For the OpenStack Compute API, a server is a virtual machine (VM) instance, a physical machine or a container.) 
 
@@ -73,14 +73,14 @@ Lists, creates, shows details for, updates, and deletes servers. (For the OpenSt
 - Delete server (DELETE)
 
 
-****Servers multiple create (servers)****
+**Servers multiple create (servers)**
 
 Creates one or more servers.
 
 - Create multiple servers (POST)
 - Create multiple servers with reservation ID (POST)
 
-****Servers - run an action (servers, action)****
+**Servers - run an action (servers, action)**
 
 - Enables all users to performs an action on a server. 
 - Add (associate) fixed IP (addFixedIp action) (POST)
@@ -124,7 +124,7 @@ Creates one or more servers.
 - Reset networking on a server (resetNetwork action) (POST)
 - Reset server state (os-resetState action) (POST)
 
-****Servers - run an administrative action (servers, action)****
+**Servers - run an administrative action (servers, action)**
 
 - Create server back up (createBackup action) (POST)
 - Inject network information (injectNetworkInfo action) (POST)
@@ -133,20 +133,20 @@ Creates one or more servers.
 - Reset networking on a server (resetNetwork action) (POST)
 - Reset server state (os-resetState action) (POST)
 
-****Servers diagnostics (servers, diagnostics)****
+**Servers diagnostics (servers, diagnostics)**
 
 Shows the usage data for a server.
 
 - Show server diagnostics (GET)
 
-****Servers IPs (servers, ips)****
+**Servers IPs (servers, ips)**
 
 Lists the IP addresses for an instance and shows details for an IP address.
 
 - List IPs (GET)
 - Show IP details (GET)
 
-****Server metadata (servers, metadata)****
+**Server metadata (servers, metadata)**
 
 Lists metadata, creates or replaces one or more metadata items, and updates one or more metadata items for a server. Also shows details for, creates or replaces, and updates a metadata item, by key, for a server.
 
@@ -157,14 +157,14 @@ Lists metadata, creates or replaces one or more metadata items, and updates one 
 - Create or update metadata item (PUT)
 - Delete metadata item (DELETE)
 
-****Servers - list actions (servers, os-instance-actions)****
+**Servers - list actions (servers, os-instance-actions)**
 
 All users can list available actions for a server and they can show details for a server action; however, only administrators can view server events in server action details.
 
 - List actions for server (GET)
 - Show server action details (GET)
 
-****Port interfaces (servers, os-interface)****
+**Port interfaces (servers, os-interface)**
 
 Creates a port interface and uses it to attach a port to a server and detaches a port interface from a server. Also, lists all port interfaces and shows details for a port interface.
 
@@ -173,13 +173,13 @@ Creates a port interface and uses it to attach a port to a server and detaches a
 - Show port interface details (GET)
 - Detach interface (DELETE)
 
-****Servers virtual interfaces (servers, os-virtual-interfaces)****
+**Servers virtual interfaces (servers, os-virtual-interfaces)**
 
 Lists virtual interfaces for a server instance.
 
 - List virtual interfaces (GET) 
 
-****Servers with volume attachments (servers, os-volume_attachments)****
+**Servers with volume attachments (servers, os-volume_attachments)**
 
 Attaches volumes that are created through the volume API to server instances. Also, lists volume attachments for a server instance, shows details for a volume attachment, and detaches a volume.
 
@@ -188,7 +188,7 @@ Attaches volumes that are created through the volume API to server instances. Al
 - Show volume attachment details (GET)
 - Detach volume (DELETE)
 
-****Flavors with extended attributes (flavors)****
+**Flavors with extended attributes (flavors)**
 
 Shows information about flavors.
 
@@ -198,7 +198,7 @@ Shows information about flavors.
 - Delete flavor (DELETE)
 - List flavors with details (GET)
 
-****Flavors access (flavors, os-flavor-access, action)****
+**Flavors access (flavors, os-flavor-access, action)**
 
 Lists tenants who have access to a private flavor and adds private flavor access to and removes private flavor access from tenants. By default, only administrators can manage private flavor access. 
 
@@ -206,7 +206,7 @@ Lists tenants who have access to a private flavor and adds private flavor access
 - Add flavor access to tenant (POST)
 - Remove flavor access from tenant (POST)
 
-****Flavors extra-specs (flavors, os-flavor-extra-specs)****
+**Flavors extra-specs (flavors, os-flavor-extra-specs)**
 
 Lists, creates, deletes, and updates the extra-specs or keys for a flavor.
 
@@ -216,7 +216,7 @@ Lists, creates, deletes, and updates the extra-specs or keys for a flavor.
 - Update an extra spec for a flavor (PUT)
 - Delete an extra spec for a flavor (DELETE)
 
-****Keypairs (keypairs)****
+**Keypairs (keypairs)**
 
 Generates, imports, and deletes SSH keys.
 
@@ -225,13 +225,13 @@ Generates, imports, and deletes SSH keys.
 - Delete keypair (DELETE)
 - Show keypair details (GET) 
 
-****Limits (limits)****
+**Limits (limits)**
 
 Shows rate and absolute limits for the tenant.
 
 - Show rate and absolute limits (GET) 
 
-****Extensions (extensions)****
+**Extensions (extensions)**
 
 Lists available extensions and shows information for an extension, by alias.
 ( Extensions are deprecated in Compute API v2.1. , and supported in v2.0.  )
@@ -239,7 +239,7 @@ Lists available extensions and shows information for an extension, by alias.
 - List extensions (GET)
 - Show extension details (GET)
 
-****Images****
+**Images**
 
 Lists, shows details for, and deletes images. Also sets, lists, shows details for, and deletes image metadata.
 
@@ -248,7 +248,7 @@ Lists, shows details for, and deletes images. Also sets, lists, shows details fo
 - Show image details (GET)
 - Delete image (DELETE)
 
-****Image metadata****
+**Image metadata**
 
 Shows details for, sets, updates, and deletes image metadata or metadata items.
 
@@ -259,7 +259,7 @@ Shows details for, sets, updates, and deletes image metadata or metadata items.
 - Create or update image metadata item (PUT)
 - Delete image metadata item (DELETE)
 
-****Guest agents (os-agents)****
+**Guest agents (os-agents)**
 
 Creates, lists, updates, and deletes guest agent builds. Use guest agents to access files on the disk, configure networking, or run other applications or scripts in the guest while the agent runs. (Use of guest agents is possible only if the underlying service provider uses the Xen driver.)
 
@@ -268,7 +268,7 @@ Creates, lists, updates, and deletes guest agent builds. Use guest agents to acc
 - Delete agent build(DELETE)
 - Update agent build(PUT) 
 
-****Host aggregates (os-aggregates, action)****
+**Host aggregates (os-aggregates, action)**
 
 Creates and manages host aggregates. An aggregate assigns metadata to groups of compute nodes. Aggregates are only visible to the cloud provider.
 
@@ -281,21 +281,21 @@ Creates and manages host aggregates. An aggregate assigns metadata to groups of 
 - Create or update aggregate metadata (POST)
 - Remove host (POST)
 
-****Assisted volume snapshots (os-assisted-volume-snapshots)****
+**Assisted volume snapshots (os-assisted-volume-snapshots)**
 
 Creates and deletes snapshots through an emulator/hypervisor. 
 
 - Create assisted volume snapshots(POST)
 - Delete assisted volume snapshot(DELETE)
  
-****Availability zones (os-availability-zone)****
+**Availability zones (os-availability-zone)**
 
 Shows availability zone information.
 
 - Get availability zone information (GET)
 - Get detailed availability zone information (GET)
 
-****Bare metal nodes (os-baremetal-nodes)****
+**Bare metal nodes (os-baremetal-nodes)**
 
 Bare metal nodes.
 
@@ -306,7 +306,7 @@ Bare metal nodes.
 - Show bare metal node details (GET)
 - Delete bare metal node (DELETE)
 
-****Cells (os-cells, capacities)****
+**Cells (os-cells, capacities)**
 
 Adds neighbor cells, lists neighbor cells, and shows the capabilities of the local cell.
 
@@ -315,14 +315,14 @@ Adds neighbor cells, lists neighbor cells, and shows the capabilities of the loc
 - Show cell data (GET)
 - Show cell capacities (GET)
 
-****Root certificates (os-certificates)****
+**Root certificates (os-certificates)**
 
 Creates and shows details for a root certificate.
 
 - Create certificate (POST)
 - Show certificate details (GET)
 
-****Cloudpipe (os-cloudpipe)****
+**Cloudpipe (os-cloudpipe)**
 
 Manages virtual VPNs for projects.
 
@@ -330,7 +330,7 @@ Manages virtual VPNs for projects.
 - Create cloudpipe (POST)
 - Update cloudpipe (POST)
 
-****Server consoles (servers, os-consoles, os-console-auth-token)****
+**Server consoles (servers, os-consoles, os-console-auth-token)**
 
 Manages server consoles.
 
@@ -340,14 +340,14 @@ Manages server consoles.
 - Delete console (DELETE)
 - Show console authentication token (GET)
 
-****Fixed IPs (os-fixed-ips)****
+**Fixed IPs (os-fixed-ips)**
 
 Shows data for a fixed IP, such as host name, CIDR, and address. Also, reserves and frees a fixed IP address.
 
 - Show fixed IP details (GET)
 - Reserve or release a fixed IP (POST)
 
-****Floating IP DNS records (os-floating-ip-dns)****
+**Floating IP DNS records (os-floating-ip-dns)**
 
 Manages DNS records associated with floating IP addresses. The API dispatches requests to a DNS driver that is selected at startup.
 
@@ -359,13 +359,13 @@ Manages DNS records associated with floating IP addresses. The API dispatches re
 - Delete DNS entry (DELETE)
 - List DNS entries (GET)
 
-****Floating IP pools (os-floating-ip-pools)****
+**Floating IP pools (os-floating-ip-pools)**
 
 Manages groups of floating IPs.
 
 - List floating IP pools (GET)
 
-****Floating IPs (os-floating-ips)****
+**Floating IPs (os-floating-ips)**
 
 Lists floating IP addresses for a project. Also, creates (allocates) a floating IP address for a project, shows floating IP address details, and deletes (deallocates) a floating IP address from a project.
 
@@ -374,7 +374,7 @@ Lists floating IP addresses for a project. Also, creates (allocates) a floating 
 - Show floating IP address details (GET)
 - Delete (deallocate) floating IP address (DELETE) 
 
-****Floating IPs bulk (os-floating-ips-bulk)****
+**Floating IPs bulk (os-floating-ips-bulk)**
 
 (nova-network only) Bulk-creates, deletes, and lists floating IPs. Default pool name is nova.
 
@@ -385,14 +385,14 @@ To view available pools, use the os-floating-ip-pools extension.
 - Bulk-delete floating IPs (POST)
 - List floating IPs by host (GET)
 
-****Ping instances (os-fping)****
+**Ping instances (os-fping)**
 
 Pings instances and reports which ones are alive.
 
 - Ping instances (GET)
 - Ping an instance (GET)
 
-****Hosts (os-hosts)****
+**Hosts (os-hosts)**
 
 Manages physical hosts. 
 
@@ -403,7 +403,7 @@ Manages physical hosts.
 - Shut down host (GET)
 - Start host (GET)
 
-****Hypervisors (os-hypervisors)****
+**Hypervisors (os-hypervisors)**
 
 Lists all hypervisors, shows summary statistics for all hypervisors over all compute nodes, shows details for a hypervisor, and shows the uptime for a hypervisor.
 
@@ -412,20 +412,20 @@ Lists all hypervisors, shows summary statistics for all hypervisors over all com
 - Show hypervisor details (GET)
 - Show hypervisor uptime (GET)
 
-****Instance usage audit log (os-instance-usage-audit-log)****
+**Instance usage audit log (os-instance-usage-audit-log)**
 
 Administrator only. Monitors task logs.
 
 - List usage audits for an instance (GET)
 - List usage audits before specified time (GET)
 
-****Migrations (os-migrations)**** 
+**Migrations (os-migrations)** 
 
 Shows data on migrations.
 
 - List migrations(GET)
 
-****Networks (os-networks)****
+**Networks (os-networks)**
 
 Creates, lists, shows information for, and deletes networks. Adds a network to a project, disassociates a network from a project, and disassociates a project from a network.
 
@@ -440,15 +440,15 @@ Associates host with and disassociates host from a network.
 - Disassociate host (POST)
 - Disassociate network (POST)
 - Disassociate project (POST)
-
-****Quota class (os-quota-class-sets)****
+- 
+**Quota class (os-quota-class-sets)**
 
 Provides quota classes management support.
 
 - Show quota (GET)
 - Update quota (PUT)
 
-****Quota sets (os-quota-sets)****
+**Quota sets (os-quota-sets)**
 
 Permits administrators, depending on policy settings, to view default quotas, view details for quotas, revert quotas to defaults, and update the quotas for a project or a project and user.
 
@@ -457,7 +457,7 @@ Permits administrators, depending on policy settings, to view default quotas, vi
 - List default quotas for tenant (GET)
 - List quotas with details (GET) 
 
-****Security groups (os-security-groups)****
+**Security groups (os-security-groups)**
 
 Lists, shows information for, creates, and deletes security groups.
 
@@ -468,7 +468,7 @@ Lists, shows information for, creates, and deletes security groups.
 - Delete security group (DELETE)
 - List security groups by server (GET)
  
-****Rules for default security group (os-security-group-default-rules)****
+**Rules for default security group (os-security-group-default-rules)**
 
 Lists, shows information for, and creates default security group rules.
 
@@ -477,20 +477,20 @@ Lists, shows information for, and creates default security group rules.
 - Show default security group rule details (GET)
 - Delete default security group rule (DELETE) 
 
-****Rules for security group (os-security-group-rules)****
+**Rules for security group (os-security-group-rules)**
 
 Creates and deletes security group rules.
 
 - Create security group rule (POST)
 - Delete security group rule (DELETE)
 
-****Create external events (os-server-external-events)****
+**Create external events (os-server-external-events)**
 
 Creates one or more external events. The API dispatches each event to a server instance.
 
 - Run events (POST).
  
-****Server groups (os-server-groups)****
+**Server groups (os-server-groups)**
 
 Lists, shows information for, creates, and deletes server groups.
 
@@ -499,14 +499,14 @@ Lists, shows information for, creates, and deletes server groups.
 - Show server group details (GET)
 - Delete server group (DELETE)
  
-****Usage reports (os-simple-tenant-usage)****
+**Usage reports (os-simple-tenant-usage)**
 
 Reports usage statistics on compute and storage resources.
 
 - List tenant usage for all tenants (GET)
 - Show usage details for tenant (GET)
 
-****Project networks (os-tenant-networks)****
+**Project networks (os-tenant-networks)**
 
 Creates, lists, shows information for, and deletes project networks.
 
@@ -519,7 +519,7 @@ Creates, lists, shows information for, and deletes project networks.
 - Disassociate network(POST)
 - Disassociate project (POST)
 
-****Volume extension (os-volumes, os-snapshots)****
+**Volume extension (os-volumes, os-snapshots)**
 
 Manages volumes and snapshots for use with the Compute API.
 
@@ -590,7 +590,7 @@ There are multiple backend transport drivers which implement the API semantics u
 
 The exception to this principle of abstraction is that the API exposes transport-specific configuration for how to connect to the messaging system itself. 
 
-****Use Cases****
+**Use Cases**
 
 - Invoke Method on One of Multiple Servers
 	- This is where we have multiple servers listening for method invocations on a topic within an exchange, where both the exchange and topic names are well known to clients. When a client invokes a method on this topic, the invocation gets dispatched to one of the listening servers in round robin fashion.	
@@ -599,7 +599,7 @@ The exception to this principle of abstraction is that the API exposes transport
 - Invoke Method on all of Multiple Servers
 	- This is where we have multiple servers listening for method invocations on a topic within an exchange, where both the exchange and topic names are well known to clients. In this case, the client wishes to invoke a method on all of these servers. 
 
-****Types Of Method Invocations****
+**Types Of Method Invocations**
 
 There are two ways that a method can be invoked:
 
@@ -608,14 +608,14 @@ There are two ways that a method can be invoked:
 
 Note that the caller need not be aware of whether a method will be invoked using a cast or a call.
 
-****Transports****
+**Transports**
 
 - Kombu/RabbitMQ
 - Qpid
 - ZeroMQ
 - Transport URLs
 
-****Targets****
+**Targets**
 
 Methods are invoked on targets. Targets are described by the following parameters:
 
@@ -630,7 +630,7 @@ Methods are invoked on targets. Targets are described by the following parameter
 
 The notify API defines semantics for emitting and handling event notifications. 
 
-****Use Cases****
+**Use Cases**
 
 - Ceilometer Metering Messages
 - Searchlight Resource Indexing
@@ -842,7 +842,7 @@ The Nova DB stores the current state of all objects in the compute cluster.  It 
 ### 2.9 Host Aggregates###
 Host aggregates can be regarded as a mechanism to further partition an availability zone. Host aggregates provide a mechanism to allow administrators to assign key-value pairs to groups of machines. Each node can have multiple aggregates, each aggregate can have multiple key-value pairs, and the same key-value pair can be assigned to multiple aggregates. This information can be used in the scheduler to enable advanced scheduling, to set up xen hypervisor resources pools or to define logical groups for migration.
 
-****Availability Zones (AZs)****
+**Availability Zones (AZs)**
 
 Availability Zones are the end-user visible logical abstraction for partitioning a cloud without knowing the physical infrastructure. The availability zone is actually a specific metadata information attached to an aggregate. Adding that specific metadata to an aggregate makes the aggregate visible from an end-user perspective and consequently allows to schedule upon a specific set of hosts (the ones belonging to the aggregate).
 
@@ -851,12 +851,12 @@ That said, there are a few rules to know that diverge from an API perspective be
 * one host can be in multiple aggregates, but it can only be in one availability zone
 * by default a host is part of a default availability zone even if it doesn’t belong to an aggregate (the configuration option is named default_availability_zone)
 
-****Xen Pool Host Aggregates****
+**Xen Pool Host Aggregates**
 
 Originally all aggregates were Xen resource pools, now an aggregate can be set up as a resource pool by giving the aggregate the correct key-value pair.
 You can use aggregates for XenServer resource pools when you have multiple compute nodes installed (only XenServer/XCP via xenapi driver is currently supported), and you want to leverage the capabilities of the underlying hypervisor resource pools.
 
-****Design****
+**Design**
 
 The OSAPI Admin API is extended to support the following operations:
 
@@ -888,19 +888,19 @@ The versioned notification concept is created to fix the shortcomings of the unv
 
 ###2.11 Virtual Machine States and Transitions###
 
-****Allowed State Transitions****
+**Allowed State Transitions**
 
 ![VM State Transitions](./resources/Architecture/VM_State_Transitions.png)
 
-****Requirements for Commands****
+**Requirements for Commands**
 
 ![Command Requirements](./resources/Architecture/Command_Requirements.png)
 
-****VM states and Possible Commands****
+**VM states and Possible Commands**
 
 ![VM State Commands](./resources/Architecture/VM_State_Commands.png)
 
-****Create Instance States****
+**Create Instance States**
 
 The following diagram shows the sequence of VM states, task states, and power states when a new VM instance is created.
 
@@ -1718,7 +1718,7 @@ Reconstructs the image using a new image while maintaining its other properties
 
 https://bugs.launchpad.net/nova/+bug/1562670
 
-****Description****
+**Description**
 
 The ability to use "nova set-password [password]" via CLI is not working properly.  This means that a user cannot change the password on an instance they have created via that command.  Initial research of "nova set-password" has not revealed any detailed documentation.  We are in the process of communicating with the OpenStack community as to whether or not our environment is configured properly, or if this is normal behavior.
 
@@ -1738,7 +1738,7 @@ The ability to use "nova set-password [password]" via CLI is not working properl
 
 https://bugs.launchpad.net/nova/+bug/1561310
 
-****Description****
+**Description**
 
 1. User tries to boot a new vm by click the button "+ Launch Instance" in dashboard web->project->compute->instances.
 2. But the button "+ Launch Instance" is disabled and shows "quota exceeded".
@@ -1752,7 +1752,7 @@ https://bugs.launchpad.net/nova/+bug/1561310
 
 Assuming this truly is a bug, this would be severely limiting to the nova service in terms of not being able to use your full resource pool for computing. If the metrics gathered from nova aren't reflecting what is available to you in your dashboard then there has to be a disconnect on either the Dashboard's side or Nova's metric gathering side. This would also effect any service based customers in a negative financial way. If they aren't able to use all the resources they are paying for, or they are using more resources than what are shown, then this severely inhibits the ability to use an OpenStack paid service cost effectively. 
 
-****Recreation****
+**Recreation**
 
 Currently we are following the ongoing conversation to gather enough information to recreate this bug. We will also need resources allocated to us as well to do this.
 
