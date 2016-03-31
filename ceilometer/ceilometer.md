@@ -175,7 +175,7 @@ roles: [ "readWrite", "dbAdmin" ]})'
 #####Configure service user and role:
 ```
 vi admin_creds
-#####Paste the following:
+#Paste the following:
 export OS_TENANT_NAME=admin
 export OS_USERNAME=admin
 export OS_PASSWORD=admin_pass
