@@ -140,7 +140,7 @@ enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer.git
 	```
 3. Nova does not generate the periodic notifications for all known instances by default. To enable these auditing events, set instance_usage_audit to true in the nova configuration file and restart the service.
 4. Cinder does not generate notifications by default. To enable these auditing events, set the following in the cinder configuration file and restart the service:
-    ```
+
 
 ##5. Using CLI##
 
