@@ -444,3 +444,8 @@ service ceilometer-agent-compute restart
 [6] http://docs.openstack.org/developer/ceilometer/architecture.html
 
 [7] https://www.rdoproject.org/install/ceilometerquickstart/
+
+[8] http://docs.openstack.org/developer/ceilometer/install/manual.html
+
+[9] https://github.com/MarouenMechtri/Ceilometer-Installation-for-OpenStack-Juno#id3
+
