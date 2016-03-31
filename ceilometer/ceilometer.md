@@ -144,7 +144,7 @@ enable_plugin ceilometer https://git.openstack.org/openstack/ceilometer.git
 ###4.2 Installing Manually###
 Here we describe how to install and configure the ceilometer on the controller node and the compute nodes using MongoDb. We can install using mySql also.
 ###4.2.1 Controller Node###
-#Change to super user mode:
+####Change to super user mode:
 sudo su
 
 #Install the MongoDB:
