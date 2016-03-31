@@ -486,7 +486,7 @@ magnum bay-delete k8sbay
 
 ## 6. Code Contribution
 
-### 6.1. Potential Contributions / Bug Fixes
+### 6.1. Magnum
 - "bashisms found in /bin/sh scripts"
   - https://bugs.launchpad.net/magnum/+bug/1561232
   - might have the experience for this but might require better understanding of bash
@@ -494,6 +494,13 @@ magnum bay-delete k8sbay
   - https://bugs.launchpad.net/magnum/+bug/1556001
   - also ran into issue trying to run example but it wasn't quite the same
   - may have already confirmed this bug
+
+### 6.2. Doc Fixes
+- "fix link to murano documentation"
+  - by Shawn Aten
+  - https://bugs.launchpad.net/bugs/1520497
+  - update link in html
+  - fix merged, https://review.openstack.org/#/c/299594/
 
 ```
 magnum/
