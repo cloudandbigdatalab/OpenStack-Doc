@@ -149,26 +149,31 @@ Here we describe how to install and configure the ceilometer on the controller n
 sudo su
 ```
 #####Install the MongoDB:
+```
 apt-get install -y mongodb-server mongodb-clients python-pymongo
-
+```
 #####Edit the /etc/mongodb.conf file:
+```
 vi /etc/mongodb.conf
 bind_ip = 10.0.0.11
 smallfiles = true
-
+```
 #####Restart the MongoDB service:
+```
 service mongodb stop
 rm -f /var/lib/mongodb/journal/prealloc.*
 service mongodb start
-
+```
 #####Create the ceilometer database:
+```
 mongo --host controller --eval '
 db = db.getSiblingDB("ceilometer");
 db.addUser({user: "ceilometer",
 pwd: "CEILOMETER_DBPASS",
 roles: [ "readWrite", "dbAdmin" ]})'
-
+```
 #####Configure service user and role:
+```
 vi admin_creds
 #####Paste the following:
 export OS_TENANT_NAME=admin
@@ -179,8 +184,9 @@ export OS_AUTH_URL=http://controller:35357/v2.0
 source admin_creds
 keystone user-create --name ceilometer --pass service_pass
 keystone user-role-add --user ceilometer --tenant service --role admin
-
+```
 #####Register the service and create the endpoint:
+```
 keystone service-create --name ceilometer --type metering --description "Telemetry"
 
 keystone endpoint-create \
@@ -189,13 +195,15 @@ keystone endpoint-create \
 --internalurl http://controller:8777 \
 --adminurl http://controller:8777 \
 --region regionOne
-
+```
 
 #####Install ceilometer packages:
+```
 apt-get install -y ceilometer-api ceilometer-collector ceilometer-agent-central \
 ceilometer-agent-notification ceilometer-alarm-evaluator ceilometer-alarm-notifier python-ceilometerclient
-
+```
 #####Edit the /etc/ceilometer/ceilometer.conf file:
+```
 vi /etc/ceilometer/ceilometer.conf
 
 [database]
@@ -226,43 +234,50 @@ os_password = service_pass
 
 [publisher]
 metering_secret = METERING_SECRET
-
+```
 #Restart the Telemetry services:
+```
 service ceilometer-agent-central restart
 service ceilometer-agent-notification restart
 service ceilometer-api restart
 service ceilometer-collector restart
 service ceilometer-alarm-evaluator restart
 service ceilometer-alarm-notifier restart
-
+```
 #####Configure the Image Service for Telemetry. Edit the /etc/glance/glance-api.conf file:
+```
 vi /etc/glance/glance-api.conf
 [DEFAULT]
 notification_driver = messaging
 rpc_backend = rabbit
 rabbit_host = controller
 rabbit_password = service_pass
-
+```
 #####Edit the /etc/glance/glance-registry.conf file:
+```
 vi /etc/glance/glance-registry.conf
 [DEFAULT]
 notification_driver = messaging
 rpc_backend = rabbit
 rabbit_host = controller
 rabbit_password = service_pass
-
+```
 #####Restart the Image Service:
+```
 service glance-registry restart
 service glance-api restart
-
+```
 ###4.2.2 Compute Node###
 #####Change to super user mode:
+```
 sudo su
-
+```
 #####Install the ceilometer agent package:
+```
 apt-get install -y ceilometer-agent-compute
-
+```
 #####Edit the /etc/nova/nova.conf:
+```
 vi /etc/nova/nova.conf
 [DEFAULT]
 instance_usage_audit = True
@@ -270,11 +285,13 @@ instance_usage_audit_period = hour
 notify_on_state_change = vm_and_task_state
 notification_driver = nova.openstack.common.notifier.rpc_notifier
 notification_driver = ceilometer.compute.nova_notifier
-
+```
 #####Restart the Compute service:
+```
 service nova-compute restart
-
+```
 #####Edit /etc/ceilometer/ceilometer.conf file:
+```
 vi /etc/ceilometer/ceilometer.conf
 
 [DEFAULT]
@@ -300,9 +317,11 @@ os_region_name = regionOne
 
 [publisher]
 metering_secret = METERING_SECRET
+```
 #####Restart the Telemetry service:
+```
 service ceilometer-agent-compute restart
-
+```
 
 ##5. Using CLI##
 
