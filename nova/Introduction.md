@@ -684,7 +684,7 @@ Combination of the above two fields would define what kind of block device the e
 
 ### 2.6 Compute ###
 
-Compute manages communication with hypervisors and virtual machines.  You can create compute nodes that will receive requests from the controller node and virtual machine instances.  The compute service relies on a hypervisor to run virtual machine instances.  OpenStack can use a number of various hypervisors such as Docker, KVM or QEMU.
+Compute manages communication with hypervisors and virtual machines.  You can create compute nodes that will receive requests from the controller node and virtual machine instances.  The compute service relies on a hypervisor to run virtual machine instances.  OpenStack can use a number of various hypervisors such as KVM, QEMU, Xen, or LXC.
 
 The basics:  Compute will accept actions from the queue and then perform a series of system commands and carry them out while updating status in the database.
 
