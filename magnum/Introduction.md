@@ -487,13 +487,35 @@ magnum bay-delete k8sbay
 ## 6. Code Contribution
 
 ### 6.1. Magnum
-- "bashisms found in /bin/sh scripts"
-  - https://bugs.launchpad.net/magnum/+bug/1561232
-  - might have the experience for this but might require better understanding of bash
-- "'Using kubernetes Bay' in quickstart doesn't work"
-  - https://bugs.launchpad.net/magnum/+bug/1556001
-  - also ran into issue trying to run example but it wasn't quite the same
-  - may have already confirmed this bug
+1.  
+  1. https://bugs.launchpad.net/magnum/+bug/1561232 "There are several shell scripts that contain bash specific syntax. This is problematic for the Debian package linter that expects ISO chell syntax."
+  2. This seems to be an issue for testing and code style compliance as it only mentions issues with the linter, not issues executing the scripts. It could mean the scripts don't work correctly in certain environments but this isn't stated. Does not affect the service or other services tangibly.
+  3. Nothing to reproduce, code style compliance.
+  4. *See Below*
+  5.  
+  ```
+  ./magnum/templates/swarm/fragments/write-network-config.sh
+  ./magnum/templates/swarm/fragments/add-proxy.sh
+  ./magnum/templates/swarm/fragments/disable-selinux.sh ./magnum/templates/swarm/fragments/configure-docker-storage.sh
+  ./magnum/templates/swarm/fragments/write-docker-service.sh
+  ./magnum/templates/mesos/fragments/add-proxy.sh
+  ./magnum/templates/kubernetes/fragments/enable-kube-proxy-master.sh
+  ./magnum/templates/kubernetes/fragments/configure-kubernetes-minion.sh
+  ./magnum/templates/kubernetes/fragments/configure-kubernetes-master.sh
+  ./magnum/templates/kubernetes/fragments/enable-kube-proxy-minion.sh
+  ./magnum/templates/kubernetes/fragments/write-kube-os-config.sh
+  ./magnum/templates/kubernetes/fragments/make-cert.sh
+  ./magnum/templates/kubernetes/fragments/configure-flannel.sh
+  ./magnum/templates/kubernetes/fragments/make-cert-client.sh
+  ./magnum/templates/kubernetes/fragments/write-network-config.sh
+  ./magnum/templates/kubernetes/fragments/enable-kube-podmaster.sh
+  ./magnum/templates/kubernetes/fragments/add-proxy.sh
+  ./magnum/templates/kubernetes/fragments/disable-selinux.sh
+  ./magnum/templates/kubernetes/fragments/configure-docker-storage.sh
+  ./devstack/plugin.sh
+  ```
+  6. The syntax issues in each file are independent from each other.
+  7. [magnum-api trace](./api-trace-py.txt) and [magnum-cond trace](./cond-trace-py.txt)
 
 ### 6.2. Doc Fixes
 - "fix link to murano documentation"
