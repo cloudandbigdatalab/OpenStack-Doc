@@ -32,7 +32,7 @@
 - 6) Code Review
 	- 6.1) Nova Code Directory Structure
 	- 6.2) Bugs
-		- 6.2.1) nova set-password returns a vague error message
+		- 6.2.1) DELETE /servers returns 404 when it should return 405
 		- 6.2.2) nova dashboard displays wrong quotas
 - 7) Code Contribution
 - 8) References
@@ -1722,25 +1722,39 @@ Reconstructs the image using a new image while maintaining its other properties
 
 ### 6.2 Bugs ###
 
-#### 6.2.1 nova set-password returns a vague error message ####
+#### 6.2.1 DELETE /servers returns 404 when it should return 405 ####
 
-https://bugs.launchpad.net/nova/+bug/1562670
+[https://bugs.launchpad.net/nova/+bug/1567970](https://bugs.launchpad.net/nova/+bug/1567970 "Bug 6.2.1")
 
 **Description**
 
-The ability to use "nova set-password [password]" via CLI is not working properly.  This means that a user cannot change the password on an instance they have created via that command.  Initial research of "nova set-password" has not revealed any detailed documentation.  We are in the process of communicating with the OpenStack community as to whether or not our environment is configured properly, or if this is normal behavior.
+When attempting to call a HTTP method other than GET or POST at the URL /servers, a 404 is returned instead of a 405.  This is unexpected behavior because the URL is valid and thus should return 405 which is the proper error for an invalid method.
 
 **Recreation**
 
-1)  Create an instance
+These instructions are assuming you are using a devstack environment
 
-    nova boot --flavor 1 --image cirros-0.3.4-x86_64-uec testing
+1)  Obtain an authentication token (change user name and password to suite your environment)
 
-2)  Attempt to change its password
+    curl -H "Content-Type: application/json" -d '
+    {
+        "auth": {
+            "passwordCredentials": {
+                "username": "admin",
+                "password": "secrete"
+            }
+        }
+    }' http://localhost:5000/v2.0/tokens | python -m json.tool
 
-    nova set-password [ID]
+2)  Send a GET request to /servers to show that the URL is valid
 
-![1562670 recreation](./resources/Code_Review/1562670_recreation.png)
+    curl -v -H 'x-auth-token: [auth-token]' -X GET http://localhost:8774/v2.1/servers
+
+3)  Send a DELETE request to /servers to show that 404 is returned despite proving in the previous step that the URL is valid
+
+    curl -v -H 'x-auth-token: [auth-token]' -X DELETE http://localhost:8774/v2.1/servers
+
+![1562670 recreation](./resources/Code_Review/1567970_recreation.png)
 
 #### 6.2.2 nova dashboard displays wrong quotas ####
 
