@@ -1756,29 +1756,56 @@ These instructions are assuming you are using a devstack environment
 
 ![1562670 recreation](./resources/Code_Review/1567970_recreation.png)
 
-#### 6.2.2 nova dashboard displays wrong quotas ####
+#### 6.2.2 POST /servers with incorrect content-type returns 400, should be 415 ####
 
-https://bugs.launchpad.net/nova/+bug/1561310
+[https://bugs.launchpad.net/nova/+bug/1567977](https://bugs.launchpad.net/nova/+bug/1567977 "Bug 6.2.2")
 
 **Description**
 
-1. User tries to boot a new vm by click the button "+ Launch Instance" in dashboard web->project->compute->instances.
-2. But the button "+ Launch Instance" is disabled and shows "quota exceeded".
-3. Then the user goes to dashboard web->project->compute->overview perspective, but finds Instances,VCPU and RAM haven't exceed the quotas. In such a case, it shows like below:
-
-	Instances - Used 8 of 10
-
-	VCPUs - Used 18 of 20
-
-	RAM - Used 512MB of 50.0GB
-
-Assuming this truly is a bug, this would be severely limiting to the nova service in terms of not being able to use your full resource pool for computing. If the metrics gathered from nova aren't reflecting what is available to you in your dashboard then there has to be a disconnect on either the Dashboard's side or Nova's metric gathering side. This would also effect any service based customers in a negative financial way. If they aren't able to use all the resources they are paying for, or they are using more resources than what are shown, then this severely inhibits the ability to use an OpenStack paid service cost effectively. 
+POSTing to /servers with a content-type of text/plain and a text/plain body results in a response code of 400. This is incorrect. It should be 415.
 
 **Recreation**
 
-Currently we are following the ongoing conversation to gather enough information to recreate this bug. We will also need resources allocated to us as well to do this.
+1) Just like the previous bug, obtain a token.
 
-As of now, per the conversation on the bugs forum and our own attempts to recreate this bug. We are trying to confirm that this is a valid bug, and if it is valid, what versions of OpenStack does it pertain to. 
+2) Send a POST request with plain-text. 
+
+	curl -v -H 'x-auth-token: [auth-token]' --data "I want a server!" http://localhost:8774/v2.1/servers
+
+![1562670 recreation](./resources/Code_Review/1567977_1_recreation.png)
+
+**Fix**
+
+I found a line in the code that seems to handle this one particular case of calling an HTTP exception
+when it finds an data type passed that it doesn't accept. Here it was calling an 'HTTPBadRequest' to
+fill out the error message. I changed this to: 'HTTPUnsupportedMediaType'. This resulted in the error 
+code of 400 to be changed to 415.
+
+[Github Code Line](https://github.com/openstack/nova/blob/master/nova/api/openstack/wsgi.py#l664)
+
+Original:
+
+![1562670 recreation](./resources/Code_Review/1567977_2_recreation.png)
+
+Change:
+
+![1562670 recreation](./resources/Code_Review/1567977_3_recreation.png)
+
+Fixed Output:
+
+![1562670 recreation](./resources/Code_Review/1567977_4_recreation.png)
+
+[Code Review](https://review.openstack.org/#/c/304958/)
+
+#### 6.2.3 Language enhancements in the description of [oslo_messaging_rabbit] ####
+
+[https://bugs.launchpad.net/openstack-manuals/+bug/1564789](https://bugs.launchpad.net/openstack-manuals/+bug/1564789)
+
+
+**Description**
+
+There was a request to update some language used across multiple documents. 
+
 
 
 ## 7. Code Contribution ##
