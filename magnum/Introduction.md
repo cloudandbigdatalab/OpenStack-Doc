@@ -496,7 +496,8 @@ magnum bay-delete k8sbay
   ```
   ./magnum/templates/swarm/fragments/write-network-config.sh
   ./magnum/templates/swarm/fragments/add-proxy.sh
-  ./magnum/templates/swarm/fragments/disable-selinux.sh ./magnum/templates/swarm/fragments/configure-docker-storage.sh
+  ./magnum/templates/swarm/fragments/disable-selinux.sh
+  ./magnum/templates/swarm/fragments/configure-docker-storage.sh
   ./magnum/templates/swarm/fragments/write-docker-service.sh
   ./magnum/templates/mesos/fragments/add-proxy.sh
   ./magnum/templates/kubernetes/fragments/enable-kube-proxy-master.sh
