@@ -488,7 +488,7 @@ magnum bay-delete k8sbay
 
 ### 6.1. Magnum
 1.  
-  1. https://bugs.launchpad.net/magnum/+bug/1561232 "There are several shell scripts that contain bash specific syntax. This is problematic for the Debian package linter that expects ISO chell syntax."
+  1. https://bugs.launchpad.net/magnum/+bug/1561232 "There are several shell scripts that contain bash specific syntax. This is problematic for the Debian package linter that expects POSIX shell compliance."
   2. This seems to be an issue for testing and code style compliance as it only mentions issues with the linter, not issues executing the scripts. It could mean the scripts don't work correctly in certain environments but this isn't stated. Does not affect the service or other services tangibly.
   3. Nothing to reproduce, code style compliance.
   4. *See Below*
@@ -517,20 +517,30 @@ magnum bay-delete k8sbay
   ```
   6. The syntax issues in each file are independent from each other.
   7. [magnum-api trace](./api-trace-py.txt) and [magnum-cond trace](./cond-trace-py.txt)
+  8. Progress
+    - I've done this in a handful changes.
+    - 6 change proposals so far.
+    - https://review.openstack.org/#/q/project:openstack/magnum+branch:master+topic:bug/1561232
+    - 4 merged, 1 abandoned, 1 awaiting review.
+    - One was abandoned because it was for the Devstack plugin and since Devstack requires bash, it didn't matter.
+    - There are 3 more files that need to be fixed but they're more involved than simple syntax correction.
+    - These 3 write configuration to /etc/bashrc.
+    - Need to figure out a different place for these variables, possibly /etc/profile.
+    - /etc/profile doesn't get run for non-login sessions though, so this may not work.
 
 ### 6.2. Doc Fixes
-- "fix link to murano documentation"
+- "fix link to Murano documentation"
   - by Shawn Aten
   - https://bugs.launchpad.net/bugs/1520497
   - update link in html
   - fix merged, https://review.openstack.org/#/c/299594/
 
-- "Done formating to solar documentation"
+- "Done formatting to Solar documentation"
   - by Annie Lezil
   - https://bugs.launchpad.net/solar/+bug/1547421
-  - done formating
+  - done formatting
   - fix merged, https://review.openstack.org/#/c/283326/
-  
+
 ```
 magnum/
 |-- contrib
