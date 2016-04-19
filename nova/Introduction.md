@@ -34,6 +34,8 @@
 	- 6.2) Bugs
 		- 6.2.1) DELETE /servers returns 404 when it should return 405
 		- 6.2.2) nova dashboard displays wrong quotas
+		- 6.2.3) Language enhancements in the description of [oslo_messaging_rabbit]
+		- 6.2.4) no warning message for empty username with inline user edit
 - 7) Code Contribution
 - 8) References
 
@@ -1806,7 +1808,43 @@ Fixed Output:
 
 There was a request to update some language used across multiple documents. 
 
+#### 6.2.4 no warning message for empty username with inline user edit (Horizon) ####
 
+[https://bugs.launchpad.net/horizon/+bug/1567398](https://bugs.launchpad.net/horizon/+bug/1567398)
+
+**Description**
+
+When an administrator attempts to change a user name via Horizon and leaves the field blank, they will not receive a warning or any feedback indicating that a blank user name field is invalid.
+
+**Recreation**
+
+These instructions are assuming you are using a devstack environment
+
+1)  Log into Horizon as an admin
+
+    Login:     admin
+    Password:  secrete
+
+2)  Using the navigation pane on the left, go to "Identity" -> "Users"
+
+3)  Hover the cursor over any user name and click the edit icon
+
+4)  Clear the field i.e. makes sure it contains no characters
+
+5)  Attempt to submit the form by clicking the check mark
+
+6)  Observe that no feedback is given
+
+![1567398 recreation](./resources/Code_Review/1567398_recreation.png)
+
+**Fix**
+
+Adding required=False to the user name form allows it to call
+update\_cell when it has been left empty.  I added logic to update\_cell
+to check if the form is empty or contains only whitespace and issue a
+warning if true and only if the form in question is called 'name'.
+
+[Code Review](https://review.openstack.org/#/c/306675/)
 
 ## 7. Code Contribution ##
 
