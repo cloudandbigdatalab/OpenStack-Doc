@@ -297,6 +297,93 @@ $ neutron port-list --fixed-ips ip_address=192.168.2.2 \
 +----------------+------+-------------------+-------------------------------------------------+
 ```
 
+##### 5 Code Walk-through:
+```sh
+Make return values from objects db api consistent:
+Previously in db api, we returned dictionaries from create() and update()
+methods while get() methods returned db models. This patch makes the
+return values consistent and thus we always get db model from db api
+operations.
+
+Files Modified:
+ 	neutron/objects/base.py
+	neutron/objects/db/api.py 
+
+
+base.py:
+	((result = dict(db_obj)))
+	result = dict(db_obj)
+  	result = {field: value for field, value in dict(db_obj).items() if value is not None}
+
+api.py:
+	((return db_obj.__dict__))
+	return db_obj
+
+---------------------------------------------------------------------------------------
+
+Remove vlan tag before injecting packets to port:
+
+Open vSwitch takes care of vlan tagging in case normal switching is
+used. When ingress traffic packets are accepted, the
+actions=output:<port_number> is used but we need to explicitly take care
+of stripping out the vlan tags.
+
+Files Modified:
+doc/source/devref/openvswitch_firewall.rst
+neutron/agent/linux/openvswitch_firewall/firewall.py
+neutron/agent/linux/openvswitch_firewall/rules.py
+neutron/tests/unit/agent/linux/openvswitch_firewall/test_firewall.py
+neutron/tests/unit/agent/linux/openvswitch_firewall/test_rules.py 
+
+openvswitch_firewall.rst
+((+ table=81, priority=100,arp,reg5=0x1,dl_dst=fa:16:3e:a4:22:10 actions=output:1))
++ table=81, priority=100,arp,reg5=0x1,dl_dst=fa:16:3e:a4:22:10 actions=strip_vlan,output:1
+
+firewall.py:
+
+{{
+     def _initialize_ingress(self, port):
+@@ -560,7 +561,7 @@ def _initialize_ingress(self, port):
+             dl_type=constants.ETHERTYPE_ARP,
+             dl_type=constants.ETHERTYPE_ARP,
+             reg_port=port.ofport,
+             reg_port=port.ofport,
+             dl_dst=port.mac,
+             dl_dst=port.mac,
+-            actions='output:{:d}'.format(port.ofport),
++            actions='output:{:d}'.format(port.ofport),
+         )
+         )
+}}
+
+     def _initialize_ingress(self, port):
+@@ -560,7 +561,7 @@ def _initialize_ingress(self, port):
+             dl_type=constants.ETHERTYPE_ARP,
+             dl_type=constants.ETHERTYPE_ARP,
+             reg_port=port.ofport,
+             reg_port=port.ofport,
+             dl_dst=port.mac,
+             dl_dst=port.mac,
+-            actions='output:{:d}'.format(port.ofport),
++            actions='strip_vlan,output:{:d}'.format(port.ofport),
+         )
+         )
+
+rules.py:
+{{	flow_template['actions'] = "output:{:d}".format(port.ofport)	}}
+	flow_template['actions'] = "strip_vlan,output:{:d}".format(port.ofport)
+
+test_firewall.py:
+
+actions='ct(commit,zone=NXM_NX_REG6[0..15]),'
+-                self.port_ofport),
++            'strip_vlan,output:{:d}'.format(self.port_ofport),
+             dl_dst=self.port_mac,
+             dl_dst=self.port_mac,
+
+test_rules.py:
+'actions': 'strip_vlan,output:1',
+```
 	
 
 

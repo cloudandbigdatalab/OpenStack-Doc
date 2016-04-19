@@ -525,6 +525,12 @@ magnum bay-delete k8sbay
   - update link in html
   - fix merged, https://review.openstack.org/#/c/299594/
 
+- "Done formating to solar documentation"
+  - by Annie Lezil
+  - https://bugs.launchpad.net/solar/+bug/1547421
+  - done formating
+  - fix merged, https://review.openstack.org/#/c/283326/
+  
 ```
 magnum/
 |-- contrib
