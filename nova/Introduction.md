@@ -1847,7 +1847,36 @@ warning if true and only if the form in question is called 'name'.
 
 [Code Review](https://review.openstack.org/#/c/306675/)
 
-#### 6.2.5 Removed "Disable user" from dropdown menu for self (Horizon) ####
+#### 6.2.5 Keyword args are defaulted to CONF values (Trove) ####
+
+[https://bugs.launchpad.net/horizon/+bug/1571076] (https://bugs.launchpad.net/horizon/+bug/15571076)
+
+**Description**
+The Trove code is full of numerous cases where kwargs are defaulted to CONF values. Unfortunately this is an error-prone way of setting up a default value, as python sets these one time only. If the module is loaded before the CONF values are taken from the config files, then the default value will be incorrect.
+
+
+**Recreation**
+For example, the following code will use the default (i.e. the value in cfg.py) for default_password_length, regardless of the value set in the trove.conf file:
+
+    def generate_random_password(password_length=CONF.default_password_length):
+        # generate password here
+        ...
+
+
+**Fix**
+The correct way of handling this is to use the following:
+
+    def generate_random_password(password_length=None):
+        password_length = password_length or CONF.default_password_length
+        # generate password here
+        ...
+
+
+[Code Review](https://review.openstack.org/#/c/306786/)
+
+[Code Review(Mitaka)](https://review.openstack.org/#/c/307501/)
+
+#### 6.2.6 Removed "Disable user" from dropdown menu for self (Horizon) ####
 
 [https://bugs.launchpad.net/horizon/+bug/1567393] (https://bugs.launchpad.net/horizon/+bug/1567393)
 
