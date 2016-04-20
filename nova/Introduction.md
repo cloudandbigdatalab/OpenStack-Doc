@@ -1883,7 +1883,6 @@ This is what the code change looks like
 
 [Code Review](https://review.openstack.org/#/c/306214/)
 
-
 ## 7. Code Contribution ##
 
 ## 8. References ##
