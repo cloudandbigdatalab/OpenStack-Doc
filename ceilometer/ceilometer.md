@@ -429,7 +429,7 @@ service ceilometer-agent-compute restart
 ```
 
 
-##7. References:##
+##8. References:##
 
 [1] most of the content is taken after reading  http://docs.openstack.org/developer/ceilometer/
 
