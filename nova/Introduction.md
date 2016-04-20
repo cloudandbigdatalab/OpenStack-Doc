@@ -36,6 +36,7 @@
 		- 6.2.2) nova dashboard displays wrong quotas
 		- 6.2.3) Language enhancements in the description of [oslo_messaging_rabbit]
 		- 6.2.4) no warning message for empty username with inline user edit
+		- 6.2.5) Removed "Disable user" from dropdown menu for self (Horizon)
 - 7) Code Contribution
 - 8) References
 
@@ -1845,6 +1846,43 @@ to check if the form is empty or contains only whitespace and issue a
 warning if true and only if the form in question is called 'name'.
 
 [Code Review](https://review.openstack.org/#/c/306675/)
+
+#### 6.2.5 Removed "Disable user" from dropdown menu for self (Horizon) ####
+
+[https://bugs.launchpad.net/horizon/+bug/1567393] (https://bugs.launchpad.net/horizon/+bug/1567393)
+
+**Description**
+
+Previously the "Disable user" option was disabled for the
+logged in user, it was displayed but not clickable. This has
+been changed to no longer display at all.
+
+**Recreation**
+
+1)  Log into Horizon as an admin
+
+    Login:     admin
+    Password:  secrete
+
+2)  Using the navigation pane on the left, go to "Identity" -> "Users"
+
+3) Click the dropdown menu in the "Actions" column for the user you are logged in as
+
+4) Observe that there is an option being displayed for "disable user." It is not clickable, but it is there.
+
+**Fix**
+
+Added a check in the code to check if the user id from the dropdown menu was the same user id as the logged in user. If these are the same user, do not display the "Disable User" button. 
+
+This is what the code change looks like 
+
+    def allowed(self, request, user=None):
+        if (not api.keystone.keystone_can_edit_user() or
+                user.id == request.user.id):
+            return False
+
+[Code Review](https://review.openstack.org/#/c/306214/)
+
 
 ## 7. Code Contribution ##
 
